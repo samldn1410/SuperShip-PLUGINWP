@@ -3,24 +3,23 @@
 
     <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 600px;">
         <form method="post">
-            <?php wp_nonce_field('ss_save_token'); ?>
+            <?php wp_nonce_field('save_token'); ?>
 
             <table class="form-table">
                 <tr>
                     <th style="width: 150px;">
-                        <label for="ss_token">Access Token</label>
+                        <label for="token">API Token</label>
                     </th>
                     <td>
-                        <input type="text" 
-                               id="ss_token"
-                               name="ss_token"
-                               value="<?php echo esc_attr(SS_Settings::get_token()); ?>"
-                               class="regular-text"
-                               placeholder="Nhập Access Token từ SuperShip"
-                               required>
-                        <p class="description">
-                            Lấy Access Token từ <a href="https://mysupership.vn" target="_blank">mysupership.vn</a>
-                        </p>
+                        <textarea id="token"
+                            name="token"
+                            class="regular-text"
+                            style="width: 450px; height: 120px; padding: 8px;"
+                            placeholder="Nhập Access Token từ SuperShip"
+                            required><?php echo esc_attr(Settings::get_token()); ?></textarea>
+                    <p class="description">
+                        Lấy API Token từ <a href="https://khachhang.supership.vn/apis" target="_blank">https://khachhang.supership.vn/apis</a>
+                    </p>
                     </td>
                 </tr>
             </table>
@@ -32,9 +31,9 @@
     </div>
 
     <?php
-    if (isset($_POST['save_token']) && wp_verify_nonce($_POST['_wpnonce'], 'ss_save_token')) {
-        SS_Settings::save_token($_POST['ss_token']);
-        echo '<div class="notice notice-success" style="margin-top: 20px;"><p> Đã lưu AccessToken thành công!</p></div>';
+    if (isset($_POST['save_token']) && wp_verify_nonce($_POST['_wpnonce'], 'save_token')) {
+        Settings::save_token($_POST['token']);
+        echo '<div class="notice notice-success" style="margin-top: 20px;"><p> Đã lưu API Token thành công!</p></div>';
     }
     ?>
 </div>
