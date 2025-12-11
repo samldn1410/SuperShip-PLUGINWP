@@ -1,15 +1,14 @@
 <?php
 if (!defined('ABSPATH')) exit;
 ?>
-
-<div class="wrap ss-create-order" style="max-width: 800px; margin-top: 20px;">
+<div class="wrap create-order" style="max-width: 800px; margin-top: 20px;">
     <h1> Tạo Đơn SuperShip</h1>
 
-    <form method="post" id="ss_order_form">
-        <?php wp_nonce_field('ss_create_order', 'ss_nonce'); ?>
-        <input type="hidden" name="ss_create_order" value="1">
+    <form method="post" id="order_form">
+        <?php wp_nonce_field('create_order', 'nonce'); ?>
+        <input type="hidden" name="create_order" value="1">
 
-        <div class="ss-section-box">
+        <div class="section-box">
             <h2 class="title">1. Kho Lấy Hàng</h2>
             <table class="form-table">
                 <tr>
@@ -18,8 +17,8 @@ if (!defined('ABSPATH')) exit;
                         <select id="pickup_code" name="pickup_code" style="width: 100%;">
                             <option value="">-- Không chọn, nhập thủ công --</option>
                             <?php 
-                            $warehouses = SS_Warehouses_Service::get_all();
-                            $default = SS_Warehouses_Service::get_default();
+                            $warehouses = Warehouses_Service::get_all();
+                            $default = Warehouses_Service::get_default();
 
                             foreach ($warehouses as $w):
                                 $sel = ($default && $default['code'] === $w['code']) ? "selected" : "";
@@ -54,7 +53,7 @@ if (!defined('ABSPATH')) exit;
                             <select id="pickup_province" name="pickup_province" style="width: 100%;">
                                 <option value="">-- Chọn tỉnh --</option>
                                 <?php 
-                                $provinces = SS_Location_Service::get_provinces();
+                                $provinces = Location_Service::get_provinces();
                                 foreach ($provinces as $p):
                                 ?>
                                     <option value="<?= esc_attr($p['code']) ?>">
@@ -72,24 +71,33 @@ if (!defined('ABSPATH')) exit;
                             </select>
                         </td>
                     </tr>
+                    <tr>
+                        <th><span style="color: red;">*</span> Phường/Xã</th>
+                        <td>
+                            <select id="pickup_commune" name="pickup_commune" style="width: 100%;" >
+                                <option value="">-- Chọn phường/xã --</option>
+                            </select>
+                        </td>
+                    </tr>
+
                 </table>
             </div>
         </div>
 
-        <div class="ss-section-box">
+        <div class="section-box">
             <h2 class="title">2.  Thông Tin Người Nhận</h2>
             <table class="form-table">
                 <tr>
                     <th><span style="color: red;">*</span> Tên người nhận</th>
-                    <td><input type="text" id="name" name="name" class="regular-text" required style="width: 100%;"></td>
+                    <td><input type="text" id="name" name="name" class="regular-text"   required style="width: 100%;"></td>
                 </tr>
                 <tr>
                     <th><span style="color: red;">*</span> SĐT</th>
-                    <td><input type="tel" id="phone" name="phone" class="regular-text" placeholder="0912345678" required style="width: 100%;"></td>
+                    <td><input type="tel" id="phone" name="phone" class="regular-text" placeholder="0912345678"  required style="width: 100%;"></td>
                 </tr>
                 <tr>
                     <th><span style="color: red;">*</span> Địa chỉ chi tiết</th>
-                    <td><input type="text" id="address" name="address" class="regular-text" placeholder="Số nhà, tên đường" required style="width: 100%;"></td>
+                    <td><input type="text" id="address" name="address" class="regular-text" placeholder="Số nhà, tên đường"  required style="width: 100%;"></td>
                 </tr>
 
                 <tr>
@@ -98,7 +106,7 @@ if (!defined('ABSPATH')) exit;
                         <select id="province" name="province" style="width: 100%;" required>
                             <option value="">-- Chọn tỉnh --</option>
                             <?php 
-                            $provinces = SS_Location_Service::get_provinces();
+                            $provinces = Location_Service::get_provinces();
                             foreach ($provinces as $p):
                             ?>
                                 <option value="<?= esc_attr($p['code']) ?>">
@@ -119,7 +127,7 @@ if (!defined('ABSPATH')) exit;
                 </tr>
 
                 <tr>
-                    <th>Phường/Xã</th>
+                  <th><span style="color: red;">*</span> Phường/Xã</th>
                     <td>
                         <select id="commune" name="commune" style="width: 100%;">
                             <option value="">-- Chọn phường/xã --</option>
@@ -129,7 +137,7 @@ if (!defined('ABSPATH')) exit;
             </table>
         </div>
 
-        <div class="ss-section-box">
+        <div class="section-box">
             <h2 class="title">3.  Hàng Hóa & Kích Thước</h2>
             <table class="form-table">
                 <tr>
@@ -147,13 +155,13 @@ if (!defined('ABSPATH')) exit;
 
                 <tr>
                     <th>Giá trị đơn hàng (VND)</th>
-                    <td><input type="number" id="value" name="value" class="regular-text" value="0" min="0" placeholder="0" style="width: 100%;"></td>
+                    <td><input type="number" id="value" name="value" class="regular-text" min="0"  placeholder="0" style="width: 100%;"></td>
                 </tr>
 
                 <tr>
                     <th><span style="color: red;">*</span> Khối lượng (gram)</th>
                     <td>
-                        <input type="number" id="weight" name="weight" class="regular-text" value="200" min="1" required placeholder="VD: 500" style="width: 100%;">
+                        <input type="number" id="weight" name="weight" class="regular-text"  value ="200" min="1"  required placeholder="VD: 500" style="width: 100%;">
                     
                     </td>
                 </tr>
@@ -161,7 +169,7 @@ if (!defined('ABSPATH')) exit;
                 <tr>
                     <th>Kích thước (cm)</th>
                     <td>
-                        <div class="ss-dimension-box">
+                        <div class="dimension-box">
                             <input type="number" id="length" name="length" value="0" min="0" placeholder="Dài">
                             <input type="number" id="width" name="width" value="0" min="0" placeholder="Rộng">
                             <input type="number" id="height" name="height" value="0" min="0" placeholder="Cao">
@@ -171,13 +179,13 @@ if (!defined('ABSPATH')) exit;
             </table>
         </div>
 
-        <div class="ss-section-box">
+        <div class="section-box">
             <h2 class="title">4. Thanh Toán & Tùy Chọn</h2>
             <table class="form-table">
                 <tr>
-                    <th>COD Amount (VND)</th>
+                    <th><span style="color: red;">*</span> COD Amount (VND)</th>
                     <td>
-                        <input type="number" id="amount" name="amount" class="regular-text" value="0" min="0" placeholder="0" style="width: 100%;">
+                        <input type="number" id="amount" name="amount" class="regular-text" min="0"  placeholder="0" style="width: 100%;">
                         <p class="description">Số tiền thu hộ khách hàng.</p>
                     </td>
                 </tr>
@@ -232,14 +240,14 @@ if (!defined('ABSPATH')) exit;
 </div>
 
 <style>
-.ss-create-order {
+.create-order {
     max-width: 850px;
     margin: 20px auto !important;
     padding: 0 10px;
 }
 /* ===== TITLE ===== */
 
-.ss-create-order .title {
+.create-order .title {
     border-left: 4px solid #0073aa;
     padding-left: 10px;
     margin-bottom: 18px;
@@ -248,7 +256,7 @@ if (!defined('ABSPATH')) exit;
 }
 
 /* ===== BOX SECTION ===== */
-.ss-section-box {
+.section-box {
     background: #fff;
     border: 1px solid #dcdcdc;
     padding: 20px 25px;
@@ -258,7 +266,7 @@ if (!defined('ABSPATH')) exit;
 }
 
 /* ===== TABLE FORM ===== */
-.ss-section-box .form-table th {
+.section-box .form-table th {
     width: 28%;
     min-width: 140px;
     padding: 10px 10px 10px 0;
@@ -266,16 +274,16 @@ if (!defined('ABSPATH')) exit;
     vertical-align: middle;
 }
 
-.ss-section-box .form-table td {
+.section-box .form-table td {
     padding: 10px 0;
 }
 
 /* ===== INPUTS ===== */
-.ss-section-box input[type="text"],
-.ss-section-box input[type="tel"],
-.ss-section-box input[type="number"],
-.ss-section-box select,
-.ss-section-box textarea {
+.section-box input[type="text"],
+.section-box input[type="tel"],
+.section-box input[type="number"],
+.section-box select,
+.section-box textarea {
     width: 100%;
     max-width: 330px;
     padding: 6px 10px;
@@ -285,24 +293,25 @@ if (!defined('ABSPATH')) exit;
 }
 
 /* ===== TEXTAREA ===== */
-.ss-section-box textarea {
+.section-box textarea {
     width: 100% !important;
     max-width: 420px;
 }
 
 /* ===== ROW WIDTH FIX ===== */
-.ss-section-box .form-table td > input.regular-text {
+.section-box .form-table td > input.regular-text {
     max-width: 330px !important;
 }
 
 /* ===== KÍCH THƯỚC HÀNG HÓA ===== */
-.ss-dimension-box {
-    display: flex;
-    gap: 6px;
-    align-items: center;
+.dimension-box input {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    text-align: center;
 }
 
-.ss-dimension-box input {
+.dimension-box input {
     width: 70px !important;
     text-align: center;
 }
@@ -315,13 +324,13 @@ if (!defined('ABSPATH')) exit;
 }
 
 /* ===== SUBMIT BUTTON ===== */
-.ss-submit-wrap {
+.submit-wrap {
     margin: 30px 0;
     padding-top: 20px;
     border-top: 1px solid #ddd;
     text-align: center;
 }
-.ss-submit-wrap button {
+.submit-wrap button {
     font-size: 18px;
     padding: 14px 36px;
     height: auto;
@@ -364,7 +373,7 @@ jQuery(function($){
         if (!province_code) return;
 
         $.post(ajaxurl, {
-            action: 'ss_load_districts',
+            action: 'load_districts',
             province_code: province_code
         }, function(res){
             if (res.districts && res.districts.length > 0) {
@@ -386,7 +395,7 @@ jQuery(function($){
         if (!province_code) return;
 
         $.post(ajaxurl, {
-            action: 'ss_load_districts',
+            action: 'load_districts',
             province_code: province_code
         }, function(res){
             if (res.districts && res.districts.length > 0) {
@@ -399,6 +408,27 @@ jQuery(function($){
         });
     });
 
+            // ===== LOAD COMMUNES FOR PICKUP DISTRICT =====
+        $('#pickup_district').on('change', function(){
+            let district_code = $(this).val();
+
+            $('#pickup_commune').html('<option value="">-- Chọn phường/xã --</option>');
+
+            if (!district_code) return;
+
+            $.post(ajaxurl, {
+                action: 'load_communes',
+                district_code: district_code
+            }, function(res){
+                if (res.communes && res.communes.length > 0) {
+                    let html = '<option value="">-- Chọn phường/xã --</option>';
+                    res.communes.forEach(function(c){
+                        html += `<option value="${c.code}">${c.name}</option>`;
+                    });
+                    $('#pickup_commune').html(html);
+                }
+            });
+        });
     // ===== LOAD COMMUNES WHEN RECEIVER DISTRICT CHANGES (Ajax) =====
     $('#district').on('change', function(){
         let district_code = $(this).val();
@@ -408,7 +438,7 @@ jQuery(function($){
         if (!district_code) return;
 
         $.post(ajaxurl, {
-            action: 'ss_load_communes',
+            action: 'load_communes',
             district_code: district_code
         }, function(res){
             if (res.communes && res.communes.length > 0) {
@@ -422,11 +452,101 @@ jQuery(function($){
     });
 
     // ===== SUBMIT FORM VALIDATION =====
-    $('#ss_order_form').on('submit', function(e){
+    $('#order_form').on('submit', function(e){
         e.preventDefault();
         
         // Kiem tra cac truong bat buoc chung
         let required_filled = true;
+
+        if (!$('#name').val()) {
+        alert("⚠️ Vui lòng nhập Tên Người Nhận!");
+        $('#name').focus();
+        return;
+    }
+
+    if (!$('#phone').val()) {
+        alert("⚠️ Vui lòng nhập Số Điện Thoại Người Nhận!");
+        $('#phone').focus();
+        return;
+    }
+
+    if (!$('#address').val()) {
+        alert("⚠️ Vui lòng nhập Địa Chỉ Chi Tiết Người Nhận!");
+        $('#address').focus();
+        return;
+    }
+
+    if (!$('#province').val()) {
+        alert("⚠️ Vui lòng chọn Tỉnh/Thành Phố Người Nhận!");
+        $('#province').focus();
+        return;
+    }
+
+    if (!$('#district').val()) {
+        alert("⚠️ Vui lòng chọn Quận/Huyện Người Nhận!");
+        $('#district').focus();
+        return;
+    }
+
+    if (!$('#commune').val()) {
+        alert("⚠️ Vui lòng chọn Phường/Xã Người Nhận!");
+        $('#commune').focus();
+        return;
+    }
+
+    // ===============================
+    // 2. KIỂM TRA KHO LẤY HÀNG
+    // ===============================
+    let pickup_code = $('#pickup_code').val();
+
+        // Nếu KHÔNG chọn kho → bắt buộc nhập thủ công
+        if (!pickup_code) {
+
+            if (!$('#pickup_name').val()) {
+                alert("⚠️ Vui lòng nhập Tên Kho Lấy Hàng!");
+                $('#pickup_name').focus();
+                return;
+            }
+
+            if (!$('#pickup_phone').val()) {
+                alert("⚠️ Vui lòng nhập SĐT Kho Lấy Hàng!");
+                $('#pickup_phone').focus();
+                return;
+            }
+
+            if (!$('#pickup_address').val()) {
+                alert("⚠️ Vui lòng nhập Địa Chỉ Kho Lấy Hàng!");
+                $('#pickup_address').focus();
+                return;
+            }
+
+            if (!$('#pickup_province').val()) {
+                alert("⚠️ Vui lòng chọn Tỉnh/Thành Kho Lấy Hàng!");
+                $('#pickup_province').focus();
+                return;
+            }
+
+            if (!$('#pickup_district').val()) {
+                alert("⚠️ Vui lòng chọn Quận/Huyện Kho Lấy Hàng!");
+                $('#pickup_district').focus();
+                return;
+            }
+
+            if (!$('#pickup_commune').val()) {
+                alert("⚠️ Vui lòng chọn Phường/Xã Kho Lấy Hàng!");
+                $('#pickup_commune').focus();
+                return;
+            }
+        }
+
+        // ===============================
+        // 3. KIỂM TRA KHỐI LƯỢNG
+        // ===============================
+        if (!$('#weight').val() || $('#weight').val() <= 0) {
+            alert("⚠️ Vui lòng nhập Khối Lượng hợp lệ (>0)!");
+            $('#weight').focus();
+            return;
+        }
         
         // Kiem tra cac truong required trong form-table (chi su dung the require tren input)
         $(this).find(':required').each(function(){
@@ -437,12 +557,12 @@ jQuery(function($){
         });
 
         if (!required_filled) {
-            alert('⚠️ Vui lòng điền đầy đủ các trường bắt buộc (*)!');
+            alert(' Vui lòng điền đầy đủ các trường bắt buộc (*)!');
             return false;
         }
 
         // Confirm truoc khi submit
-        if (confirm('✅ Bạn chắc chắn muốn tạo đơn hàng này không?')) {
+        if (confirm(' Bạn chắc chắn muốn tạo đơn hàng này không?')) {
             this.submit();
         }
     });

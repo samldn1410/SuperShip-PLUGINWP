@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class SS_Warehouses_Service {
+class Warehouses_Service {
 
-    const CACHE_KEY = 'ss_warehouses_cache';
+    const CACHE_KEY = 'warehouses_cache';
 
     // ... (Các hàm static get_all, get_default, find không đổi)
 
@@ -11,7 +11,7 @@ class SS_Warehouses_Service {
         $cached = get_transient(self::CACHE_KEY);
         if ($cached) return $cached;
 
-        $res = SS_API::get('/v1/partner/warehouses');
+        $res = API::get('/v1/partner/warehouses');
 
         if ($res && $res['status'] === 'Success') {
             $list = $res['results'];

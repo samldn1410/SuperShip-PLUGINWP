@@ -1,18 +1,17 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class SS_Admin_Create_Order {
+class Admin_Create_Order {
 
     public static function init() {
         add_action('admin_init', [__CLASS__, 'handle']);
+        add_action('wp_ajax_create_order_ajax', [__CLASS__, 'handle_ajax_creation']);
     }
 
     public static function handle() {
-        if (!isset($_POST['ss_create_order']) || !wp_verify_nonce($_POST['ss_nonce'], 'ss_create_order')) {
+        if (!isset($_POST['create_order']) || !wp_verify_nonce($_POST['nonce'], 'create_order')) {
             return;
         }
-
-        // 1. Lay va Xac thuc thong tin Nguoi Nhan (Receiver) - Luon lay CODE
         $receiver_codes = [
             'province_code' => sanitize_text_field($_POST['province'] ?? ''), // CODE
             'district_code' => sanitize_text_field($_POST['district'] ?? ''), // CODE
@@ -23,14 +22,11 @@ class SS_Admin_Create_Order {
             self::show_error('Vui long chon Tinh/Quan/Huyen nguoi nhan!');
             return;
         }
-
-        // 2. Lay va Xac thuc thong tin Nguoi Gui (Pickup)
         $pickup_code_val = sanitize_text_field($_POST['pickup_code'] ?? '');
         $pickup_data = []; 
 
         if ($pickup_code_val) {
-            // Truong hop 1: Chon Kho hang (UU TIEN PICKUP_CODE)
-            $warehouse = SS_Warehouses_Service::find($pickup_code_val);
+            $warehouse = Warehouses_Service::find($pickup_code_val);
             
             if (!$warehouse) {
                 self::show_error('Kho lay hang khong hop le!');
@@ -63,24 +59,18 @@ class SS_Admin_Create_Order {
                 'name' => sanitize_text_field($_POST['pickup_name'] ?? ''),
             ];
         }
-
-        // Xac thuc thong tin toi thieu (Chi can kiem tra truong hop nhap thu cong)
-        // Chi khi KHONG co pickup_code moi bat buoc cac truong con lai phai day du
-        if (!$pickup_code_val && (!$pickup_data['province'] || !$pickup_data['district'] || !$pickup_data['phone'] || !$pickup_data['address'] || !$pickup_data['name'])) {
+      if (!$pickup_code_val && (!$pickup_data['province'] || !$pickup_data['district'] || !$pickup_data['commune'] || !$pickup_data['phone'] || !$pickup_data['address'] || !$pickup_data['name'])) {
             self::show_error('Vui long dien day du thong tin kho!');
             return;
         }
 
-        // 3. Chuan bi Dia Chi Tinh/Quan/Huyen duoi dang TEN cho Payload API
-
-        // Chuyen CODE Nguoi nhan sang TEN
-        $receiver_province_name = SS_Order_Service::get_location_name($receiver_codes['province_code']);
-        $receiver_district_name = SS_Order_Service::get_location_name_district($receiver_codes['province_code'], $receiver_codes['district_code']);
-        $receiver_commune_name = SS_Location_Service::get_commune_name($receiver_codes['district_code'], $receiver_codes['commune_code']);
+        $receiver_province_name = Order_Service::get_location_name($receiver_codes['province_code']);
+        $receiver_district_name = Order_Service::get_location_name_district($receiver_codes['province_code'], $receiver_codes['district_code']);
+        $receiver_commune_name = Location_Service::get_commune_name($receiver_codes['district_code'], $receiver_codes['commune_code']);
 
         // Chuyen CODE Nguoi gui sang TEN (Chi can thuc hien khi KHONG co pickup_code)
-        $pickup_province_name = SS_Order_Service::get_location_name($pickup_data['province']); // Neu chon kho: se la '' -> ''
-        $pickup_district_name = SS_Order_Service::get_location_name_district($pickup_data['province'], $pickup_data['district']); // Neu chon kho: se la '' -> ''
+        $pickup_province_name = Order_Service::get_location_name($pickup_data['province']); // Neu chon kho: se la '' -> ''
+        $pickup_district_name = Order_Service::get_location_name_district($pickup_data['province'], $pickup_data['district']); // Neu chon kho: se la '' -> ''
         $pickup_commune_name = $pickup_data['commune']; 
 
         // Chi kiem tra va bao loi khi nhap tay ma khong tim duoc Tên Tỉnh/Quận
@@ -91,15 +81,12 @@ class SS_Admin_Create_Order {
 
         // 4. Xay dung Payload tao don
         $payload = [
-            // Thong tin Nguoi Nhan (Yeu cau TEN)
             'name' => sanitize_text_field($_POST['name'] ?? ''),
             'phone' => sanitize_text_field($_POST['phone'] ?? ''),
             'address' => sanitize_text_field($_POST['address'] ?? ''),
             'province' => $receiver_province_name,
             'district' => $receiver_district_name,
             'commune' => $receiver_commune_name,
-            
-            // Thong tin Hang hoa & Thanh toan
             'amount' => intval($_POST['amount'] ?? 0),
             'value' => intval($_POST['value'] ?? 0),
             'weight' => intval($_POST['weight'] ?? 0),
@@ -110,25 +97,19 @@ class SS_Admin_Create_Order {
             'product' => sanitize_text_field($_POST['product'] ?? ''),
             'product_type' => '1',
         ];
-
-        // Thong tin Nguoi Gui (Pickup)
         if ($pickup_code_val) {
-            // Uu tien dung pickup_code neu co
             $payload['pickup_code'] = $pickup_code_val; 
         }
         
-        // Luon gui day du thong tin gui hang (Du co pickup_code hay khong)
         $payload['pickup_name'] = $pickup_data['name'];
         $payload['pickup_phone'] = $pickup_data['phone'];
         $payload['pickup_address'] = $pickup_data['address'];
-        
-        // Gui TEN (Neu nhap tay) hoac RONG (Neu chon kho)
         $payload['pickup_province'] = $pickup_province_name; 
         $payload['pickup_district'] = $pickup_district_name; 
         $payload['pickup_commune'] = $pickup_commune_name; 
         
         // 5. Tao don hang
-        $order = SS_Order_Service::create_order($payload);
+        $order = Order_Service::create_order($payload);
 
         // 6. Hien thi ket qua
         self::show_result($order);
@@ -155,5 +136,51 @@ class SS_Admin_Create_Order {
                 echo "</pre>";
             }
         });
+
+
+    }
+    public static function handle_ajax_creation() {
+        // 1. Kiểm tra Nonce và Quyền
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'create_order_nonce') || !current_user_can('edit_shop_orders')) {
+            wp_send_json_error(['message' => 'Lỗi bảo mật hoặc không có quyền truy cập.'], 403);
+        }
+    
+        $receiver_codes = [
+            'province_code' => sanitize_text_field($_POST['province'] ?? ''), // CODE
+            'district_code' => sanitize_text_field($_POST['district'] ?? ''), // CODE
+            'commune_code' => sanitize_text_field($_POST['commune'] ?? ''), // CODE
+        ];
+
+        if (!$receiver_codes['province_code'] || !$receiver_codes['district_code']) {
+            wp_send_json_error(['message' => 'Vui lòng chọn Tỉnh/Quận/Huyện người nhận!'], 400);
+        }
+
+        $pickup_code_val = sanitize_text_field($_POST['pickup_code'] ?? '');
+       
+        $payload = [
+    
+            'name' => sanitize_text_field($_POST['name'] ?? ''),
+            'phone' => sanitize_text_field($_POST['phone'] ?? ''),
+            'address' => sanitize_text_field($_POST['address'] ?? ''),
+            'amount' => intval($_POST['amount'] ?? 0),
+            'weight' => intval($_POST['weight'] ?? 0),
+        ];
+        $result = Order_Service::create_order($payload);
+        
+
+        // 6. Trả về kết quả
+        if ($result['status'] === 'Success') {
+            wp_send_json_success([
+                'message' => 'Tạo đơn thành công! Mã đơn SuperShip: ' . esc_html($result['results']['code']),
+                'code' => $result['results']['code'],
+                'order_id' => intval($_POST['order_id']),
+            ]);
+        } else {
+            $error_message = $result['message'] ?? 'Lỗi không xác định khi gọi API SuperShip.';
+            wp_send_json_error([
+                'message' => 'Tạo đơn thất bại! Lỗi: ' . esc_html($error_message),
+                'details' => $result,
+            ], 400);
+        }
     }
 }
