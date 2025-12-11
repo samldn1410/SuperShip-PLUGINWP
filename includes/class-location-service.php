@@ -1,17 +1,17 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class SS_Location_Service {
+class Location_Service {
 
-    const CACHE_P = 'ss_provinces';
-    const CACHE_D = 'ss_districts_';
-    const CACHE_C = 'ss_communes_';
+    const CACHE_P = 'provinces';
+    const CACHE_D = 'districts_';
+    const CACHE_C = 'communes_';
 
     public static function get_provinces() {
         $cached = get_transient(self::CACHE_P);
         if ($cached) return $cached;
 
-        $res = SS_API::get('/v1/partner/areas/province');
+        $res = API::get('/v1/partner/areas/province');
 
         if ($res['status'] === 'Success') {
             set_transient(self::CACHE_P, $res['results'], 24 * HOUR_IN_SECONDS);
@@ -28,7 +28,7 @@ class SS_Location_Service {
         $cached = get_transient($key);
         if ($cached) return $cached;
 
-        $res = SS_API::get('/v1/partner/areas/district?province=' . urlencode($province_code));
+        $res = API::get('/v1/partner/areas/district?province=' . urlencode($province_code));
 
         if ($res['status'] === 'Success') {
             set_transient($key, $res['results'], 24 * HOUR_IN_SECONDS);
@@ -45,7 +45,7 @@ class SS_Location_Service {
         $cached = get_transient($key);
         if ($cached) return $cached;
 
-        $res = SS_API::get('/v1/partner/areas/commune?district=' . urlencode($district_code));
+        $res = API::get('/v1/partner/areas/commune?district=' . urlencode($district_code));
 
         if ($res['status'] === 'Success') {
             set_transient($key, $res['results'], 24 * HOUR_IN_SECONDS);
