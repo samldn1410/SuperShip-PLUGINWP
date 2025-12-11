@@ -1,12 +1,12 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class SS_API {
+class API {
 
     private static function headers() {
         return [
             'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . SS_Settings::get_token()
+            'Authorization' => 'Bearer ' . Settings::get_token()
         ];
     }
 
