@@ -1,0 +1,89 @@
+.box { 
+    background: #f7f9fc; 
+    padding: 12px; 
+    border-radius: 8px; 
+    font-size: 13px; 
+    line-height: 1.4;
+}
+.title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d40000;
+}
+.row { margin-bottom: 10px;margin-top: 10px; }
+.label { 
+    font-weight: 600; 
+    color: #333; 
+    display: inline-block; 
+    width: 100px; 
+}
+.value { 
+    font-weight: 600; 
+    color: #0071a1; 
+}
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #d4f5d1;
+    color: #2d7a28;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+.label {
+    display: inline-block;
+    width: 160px; /* chỉnh tùy ý: 120, 150, 180... */
+    font-weight: bold;
+}
+.cancel-btn {
+    background: #d8f3dc;
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: #2d7a28;
+    font-size: 11px;
+    margin-left: 8px;
+    cursor: pointer;
+}
+.track-btn {
+    display: block;
+    margin-top: 14px;
+    background: #ff4b4b;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.journey-item {
+    margin-bottom: 10px;
+}
+
+.journey-time {
+    font-size: 13px;
+    color: #666;
+}
+
+.journey-status {
+    font-size: 14px;
+    color: #000;
+}
+
+.journey-location {
+    font-size: 13px;
+    color: #777;
+}
+
+.journey-note {
+    font-size: 13px;
+    font-style: italic;
+    color: #444;
+}
+.row strong {
+    margin-right: 6px; /* hoặc 10px tùy ý */
+}
