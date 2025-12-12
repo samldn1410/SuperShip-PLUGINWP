@@ -1,14 +1,10 @@
 <?php
 if (!defined('ABSPATH')) exit;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 class Admin_UI {
 
     const AJAX_NONCE = 'modal_nonce';
     
     public static function init() {
-        // add_action('woocommerce_order_item_add_action_buttons', [__CLASS__, 'render_order_buttons']);
-        add_action('add_meta_boxes', [__CLASS__, 'add_supership_metabox']);
-        // add_action('woocommerce_admin_order_data_after_order_details', [__CLASS__, 'render_order_buttons']);
         add_action('admin_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
         add_action('admin_footer', [__CLASS__, 'add_modal_html']);
         add_action('admin_init', function() {
@@ -32,13 +28,11 @@ class Admin_UI {
                 $wpdb->prepare("SELECT supership_code FROM $table WHERE wp_order_id = %d", $order_id),
                 ARRAY_A
             );
-
             $code = $supership['supership_code'] ?? '';
 
             if (!$code) {
                 wp_send_json_error(['message' => 'Không tìm thấy mã đơn SuperShip để cập nhật.']);
             }
-            // gọi API SuperShip
             $result = Order_Service::get_order_info($code);
             if ($result['status'] === 'Success') {
                 Order_Service::update_supership_order_info($order_id, $result);
@@ -47,123 +41,6 @@ class Admin_UI {
             wp_send_json_error(['message' => 'Không cập nhật được thông tin']);
         });
     }
-   
-    private static function get_screen_id() {
-
-        $is_hpos = class_exists(CustomOrdersTableController::class)
-            && wc_get_container()->get(CustomOrdersTableController::class)->custom_orders_table_usage_is_enabled();
-
-        return $is_hpos
-            ? wc_get_page_screen_id('shop-order')
-            : 'shop_order';
-    }
-
-    public static function add_supership_metabox() {
-     $screen = self::get_screen_id();
-        add_meta_box(
-            'supership_box',
-            'SuperShip Actions',
-            [__CLASS__, 'render_order_buttons'],
-             $screen,
-            'normal',      // vị trí: side, normal, advanced
-            'high'
-        );
-    }
-
-   public static function render_order_buttons($order)
-    {
-        if ($order instanceof WP_Post) {
-            $order = wc_get_order($order->ID);
-        }
-        if (!$order) return;
-
-        global $wpdb;
-        $order_id = $order->get_id();
-        $table = $wpdb->prefix . 'supership_orders';
-
-        $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT supership_code, status_name FROM $table WHERE wp_order_id = %d", $order_id),
-            ARRAY_A
-        );
-
-        // Wrapper UI đẹp
-        echo '<div class="ss-order-actions" 
-                style="margin-top:15px; 
-                    display:flex; 
-                    gap:10px; 
-                    align-items:center;
-                    flex-wrap:wrap;">';
-
-        /** 1) Chưa tạo đơn → chỉ hiện nút tạo */
-        if (!$row) {
-            echo '<a href="#" 
-                    class="button button-primary create-order-btn"
-                    id="create-order-modal-btn"
-                    data-order-id="' . $order_id . '">
-                    Tạo đơn vận chuyển SuperShip
-                </a>';
-
-            echo '</div>';
-            return;
-        }
-
-        /** Normalize */
-        $code   = $row['supership_code'];
-        $status = strtolower(trim($row['status_name']));
-
-        /** 2) Đơn đã hủy → badge màu xám */
-        if (in_array($status, ['hủy', 'huy', 'canceled', 'cancel'])) {
-
-            echo '<span class="button" 
-                    style="background:#777; 
-                        color:white; 
-                        cursor:default;">
-                    Đơn đã hủy
-                </span>';
-
-            echo '</div>';
-            return;
-        }
-
-        /** 3) Đã tạo đơn – Badge mã đơn */
-        echo '<span class="button" 
-                style="background:#28a745; 
-                    color:white; 
-                    cursor:default;">
-                Đã tạo đơn: ' . esc_html($code) . '
-            </span>';
-
-        /** 4) Nút cập nhật (đẹp hơn và đồng bộ màu) */
-        echo '<a href="#" 
-                class="button update-order-info action-btn"
-                data-order-id="' . $order_id . '" 
-                style="background:#2271b1; 
-                    color:white;">
-                Cập nhật đơn
-            </a>';
-
-        /** 5) Nút hủy đơn nếu trạng thái cho phép */
-        $pickup_states = [
-            'chờ lấy hàng',
-            'cho lay hang',
-            'cho_lay_hang',
-            'pending_pickup'
-        ];
-
-        if (in_array($status, $pickup_states)) {
-
-            echo '<a href="#"
-                    class="button cancel-order"
-                    data-order-id="' . $order_id . '"
-                    data-code="' . esc_attr($code) . '"
-                    style="background:#ff4a4a; 
-                        color:white;">
-                    Hủy đơn
-                </a>';
-        }
-        echo '</div>';
-    }
-    
     public static function ajax_cancel_supership_order()
     {
        check_ajax_referer('modal_nonce', 'security');
@@ -202,30 +79,24 @@ class Admin_UI {
 
         wp_send_json_error(['message' => 'Hủy thất bại']);
     }
-    // --- ENQUEUE & MODAL HTML ---
+
 
     public static function enqueue_assets($hook) {
             $screen = get_current_screen();
-
             if (!$screen) return;
-
             // WooCommerce HPOS screen
             $is_hpos = $screen->id === 'woocommerce_page_wc-orders';
-
             // Classic screen
             $is_classic = $hook === 'post.php' && $screen->post_type === 'shop_order';
-
             if (!$is_hpos && !$is_classic) {
                 return;
             }
-
             wp_enqueue_style(
                 'admin-modal-style',
                 URL . 'assets/css/supership-modal.css',
                 [],
                 '1.0'
             );
-
             wp_enqueue_script(
                 'admin-modal-script',
                 URL . 'assets/js/supership-modal.js',
@@ -233,12 +104,26 @@ class Admin_UI {
                 '1.0',
                 true
             );
-
             wp_localize_script('admin-modal-script', 'modal_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce'    => wp_create_nonce(self::AJAX_NONCE),
             ]);
-        }
+
+            wp_enqueue_script(
+            'sweetalert2',
+            'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js',
+            [],
+            '11',
+            true
+        );
+
+        wp_enqueue_style(
+            'sweetalert2-css',
+            'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css',
+            [],
+            '11'
+        );
+}
    public static function add_modal_html() {
         $screen = get_current_screen();
         if (!$screen) return;
@@ -285,29 +170,19 @@ class Admin_UI {
         <?php
     }
     
-    // --- AJAX HANDLERS ---
-    
-    /**
-     * AJAX: Xử lý hiển thị form cấu hình trong Modal.
-     */
     public static function handle_ajax_load_config_modal() {
         if (!check_ajax_referer(self::AJAX_NONCE, 'security', false) || !current_user_can('edit_shop_orders') || !isset($_POST['order_id'])) {
             wp_send_json_error(['message' => 'Lỗi bảo mật hoặc thiếu dữ liệu.']);
         }
-        
         $order_id = intval($_POST['order_id']);
         $order = wc_get_order($order_id);
-        
         if (!$order) {
             wp_send_json_error(['message' => 'Đơn hàng không tồn tại.']);
         }
-
         $data = self::get_modal_form_data($order_id, $order);
-        
         ob_start();
         self::render_config_form($data, $order);
         $html_content = ob_get_clean();
-
         wp_send_json_success(['html' => $html_content]);
     }
 
@@ -330,13 +205,8 @@ class Admin_UI {
         if (!class_exists('WC_Custom_Fields') || !class_exists('Order_Creation_Handler')) {
              wp_send_json_error(['message' => 'Lớp xử lý nghiệp vụ hoặc Data Layer không tồn tại.']);
         }
-
-        // 1. LƯU CẤU HÌNH TRƯỚC
         self::save_config_from_modal($order_id, $config_data);
-
-        // 2. TẠO ĐƠN HÀNG (Gọi Handler nghiệp vụ)
         $result = Order_Creation_Handler::create_supership_order($wc_order);
-
         // 3. XỬ LÝ KẾT QUẢ
         if ($result['success']) {
             WC_Custom_Fields::save_field($order_id, 'order_code', $result['code']);
@@ -359,12 +229,7 @@ class Admin_UI {
             ]);
         }
     }
-
-    // --- HELPER METHODS ---
-
-    /**
-     * Lấy dữ liệu cần thiết để điền vào Modal Form.
-     */
+ 
     private static function get_modal_form_data($order_id, $order) {
         $data = [
             'pickup_code' => WC_Custom_Fields::get_field($order_id, 'pickup_code'),
@@ -388,52 +253,90 @@ class Admin_UI {
     /**
      * Render HTML Form Modal (Chỉ giữ lại 5 trường cấu hình SuperShip)
      */
-    private static function render_config_form($data, $order) {
+ private static function render_config_form($data, $order) {
         extract($data); // Lấy biến từ mảng $data
         ?>
         <div class="config-form">
             <div class="row">
-                <label>Kho Hàng:</label>
+                <label><?php esc_html_e('Kho Hàng', 'supership'); ?>:</label>
                 <select name="select_pickup_code" <?php echo $disabled_attr; ?>>
-                    <option value="">-- Mặc định: <?php echo esc_html($default_pickup_code ?: 'CHƯA CÓ'); ?> --</option>
+                    <option value="">
+                        <?php
+                        printf(
+                            esc_html__('-- Mặc định: %s --', 'supership'),
+                            esc_html($default_pickup_code ?: __('CHƯA CÓ', 'supership'))
+                        );
+                        ?>
+                    </option>
                     <?php 
                     foreach ($warehouses as $w):
                         $is_selected = ($current_pickup_code === $w['code']) ? "selected" : "";
-                        $is_default_label = (isset($w['primary']) && $w['primary'] == "1") ? " (Mặc định)" : "";
+                        $is_default_label = (isset($w['primary']) && $w['primary'] == "1")
+                            ? ' (' . esc_html__('Mặc định', 'supership') . ')'
+                            : '';
                     ?>
-                        <option value="<?= esc_attr($w['code']) ?>" <?= $is_selected ?>><?= esc_html($w['name']) ?> (<?= esc_html($w['code']) ?>) <?= $is_default_label ?></option>
+                        <option value="<?php echo esc_attr($w['code']); ?>" <?php echo $is_selected; ?>>
+                            <?php echo esc_html($w['name']); ?>
+                            (<?php echo esc_html($w['code']); ?>)
+                            <?php echo $is_default_label; ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>
             
-            <div class="row"><label>Cho Xem/Thử Hàng:</label><select name="config" <?php echo $disabled_attr; ?>>
-                <option value="1" <?php selected($config, 1); ?>>Cho Xem Hàng Nhưng Không Cho Thử Hàng</option>
-                <option value="2" <?php selected($config, 2); ?>>Cho Thử Hàng</option>
-                <option value="3" <?php selected($config, 3); ?>>Không Cho Xem Hàng</option>
-            </select></div>
+            <div class="row">
+                <label><?php esc_html_e('Cho Xem / Thử Hàng', 'supership'); ?>:</label>
+                <select name="config" <?php echo $disabled_attr; ?>>
+                    <option value="1" <?php selected($config, 1); ?>>
+                        <?php esc_html_e('Cho xem hàng nhưng không cho thử hàng', 'supership'); ?>
+                    </option>
+                    <option value="2" <?php selected($config, 2); ?>>
+                        <?php esc_html_e('Cho thử hàng', 'supership'); ?>
+                    </option>
+                    <option value="3" <?php selected($config, 3); ?>>
+                        <?php esc_html_e('Không cho xem hàng', 'supership'); ?>
+                    </option>
+                </select>
+            </div>
             
-            <div class="row"><label>Người Trả Phí:</label><select name="payer" <?php echo $disabled_attr; ?>>
-                <option value="1" <?php selected($payer, 1); ?>>Người Gửi</option>
-                <option value="2" <?php selected($payer, 2); ?>>Người Nhận</option>
-            </select></div>
+            <div class="row">
+                <label><?php esc_html_e('Người Trả Phí', 'supership'); ?>:</label>
+                <select name="payer" <?php echo $disabled_attr; ?>>
+                    <option value="1" <?php selected($payer, 1); ?>>
+                        <?php esc_html_e('Người gửi', 'supership'); ?>
+                    </option>
+                    <option value="2" <?php selected($payer, 2); ?>>
+                        <?php esc_html_e('Người nhận', 'supership'); ?>
+                    </option>
+                </select>
+            </div>
             
-            <div class="row"><label>Gói Dịch Vụ:</label><select name="service" <?php echo $disabled_attr; ?>>
-                <option value="1" <?php selected($service, 1); ?>>Tốc Hành</option>
-            </select></div>
+            <div class="row">
+                <label><?php esc_html_e('Gói Dịch Vụ', 'supership'); ?>:</label>
+                <select name="service" <?php echo $disabled_attr; ?>>
+                    <option value="1" <?php selected($service, 1); ?>>
+                        <?php esc_html_e('Tốc hành', 'supership'); ?>
+                    </option>
+                </select>
+            </div>
             
-            <div class="row"><label>Đổi/Lấy Hàng Về:</label><select name="barter" <?php echo $disabled_attr; ?>>
-                <option value="" <?php selected($barter, ''); ?>>Không</option>
-                <option value="1" <?php selected($barter, 1); ?>>Có</option>
-            </select></div>
+            <div class="row">
+                <label><?php esc_html_e('Đổi / Lấy Hàng Về', 'supership'); ?>:</label>
+                <select name="barter" <?php echo $disabled_attr; ?>>
+                    <option value="" <?php selected($barter, ''); ?>>
+                        <?php esc_html_e('Không', 'supership'); ?>
+                    </option>
+                    <option value="1" <?php selected($barter, 1); ?>>
+                        <?php esc_html_e('Có', 'supership'); ?>
+                    </option>
+                </select>
+            </div>
         </div>
-        <?php
-    }
+    <?php
+}
 
-    /**
-     * Hàm lưu dữ liệu cấu hình từ Modal vào Meta Fields
-     */
+  
     private static function save_config_from_modal($order_id, $config_data) {
-        // Lưu cấu hình SuperShip
         WC_Custom_Fields::save_field($order_id, 'pickup_code', sanitize_text_field($config_data['select_pickup_code'] ?? ''));
         WC_Custom_Fields::save_field($order_id, 'config', intval($config_data['config'] ?? 1));
         WC_Custom_Fields::save_field($order_id, 'payer', intval($config_data['payer'] ?? 1));

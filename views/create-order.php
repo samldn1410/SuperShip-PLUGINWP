@@ -2,109 +2,117 @@
 if (!defined('ABSPATH')) exit;
 ?>
 <div class="wrap create-order" style="max-width: 800px; margin-top: 20px;">
-    <h1> Tạo Đơn SuperShip</h1>
+    <h1><?php _e('Tạo Đơn SuperShip', 'supership'); ?></h1>
 
     <form method="post" id="order_form">
         <?php wp_nonce_field('create_order', 'nonce'); ?>
         <input type="hidden" name="create_order" value="1">
 
+        <!-- ================== 1. KHO LẤY HÀNG ================== -->
         <div class="section-box">
-            <h2 class="title">1. Kho Lấy Hàng</h2>
+            <h2 class="title"><?php _e('1. Kho Lấy Hàng', 'supership'); ?></h2>
+
             <table class="form-table">
                 <tr>
-                    <th>Chọn kho</th>
+                    <th><?php _e('Chọn kho', 'supership'); ?></th>
                     <td>
-                        <select id="pickup_code" name="pickup_code" style="width: 100%;">
-                            <option value="">-- Không chọn, nhập thủ công --</option>
-                            <?php 
+                        <select id="pickup_code" name="pickup_code" style="width:100%;">
+                            <option value="">
+                                <?php _e('-- Không chọn, nhập thủ công --', 'supership'); ?>
+                            </option>
+                            <?php
                             $warehouses = Warehouses_Service::get_all();
                             $default = Warehouses_Service::get_default();
-
                             foreach ($warehouses as $w):
-                                $sel = ($default && $default['code'] === $w['code']) ? "selected" : "";
+                                $sel = ($default && $default['code'] === $w['code']) ? 'selected' : '';
                             ?>
-                                <option value="<?= esc_attr($w['code']) ?>" <?= $sel ?>>
-                                    <?= esc_html($w['name']) ?> - <?= esc_html($w['formatted_address']) ?>
+                                <option value="<?= esc_attr($w['code']); ?>" <?= $sel; ?>>
+                                    <?= esc_html($w['name']); ?> - <?= esc_html($w['formatted_address']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <p class="description">Nếu không chọn, hãy nhập thông tin kho thủ công bên dưới.</p>
+                        <p class="description">
+                            <?php _e('Nếu không chọn, hãy nhập thông tin kho thủ công bên dưới.', 'supership'); ?>
+                        </p>
                     </td>
                 </tr>
             </table>
 
-            <div id="pickup_manual_fields" style="border-top: 1px dashed #ddd; padding-top: 15px; margin-top: 15px;">
+            <div id="pickup_manual_fields" style="border-top:1px dashed #ddd;padding-top:15px;margin-top:15px;">
                 <table class="form-table">
                     <tr>
-                        <th><span style="color: red;">*</span> Tên kho (người gửi)</th>
-                        <td><input type="text" id="pickup_name" name="pickup_name" class="regular-text" style="width: 100%;"></td>
+                        <th><span style="color:red">*</span> <?php _e('Tên kho (người gửi)', 'supership'); ?></th>
+                        <td><input type="text" id="pickup_name" name="pickup_name" style="width:100%;"></td>
                     </tr>
                     <tr>
-                        <th><span style="color: red;">*</span> SĐT kho</th>
-                        <td><input type="tel" id="pickup_phone" name="pickup_phone" class="regular-text" placeholder="0234567890" style="width: 100%;"></td>
+                        <th><span style="color:red">*</span> <?php _e('SĐT kho', 'supership'); ?></th>
+                        <td><input type="tel" id="pickup_phone" name="pickup_phone" style="width:100%;"></td>
                     </tr>
                     <tr>
-                        <th><span style="color: red;">*</span> Địa chỉ kho</th>
-                        <td><input type="text" id="pickup_address" name="pickup_address" class="regular-text" style="width: 100%;"></td>
+                        <th><span style="color:red">*</span> <?php _e('Địa chỉ kho', 'supership'); ?></th>
+                        <td><input type="text" id="pickup_address" name="pickup_address" style="width:100%;"></td>
                     </tr>
                     <tr>
-                        <th><span style="color: red;">*</span> Tỉnh/Thành Phố</th>
+                        <th><span style="color:red">*</span> <?php _e('Tỉnh / Thành phố', 'supership'); ?></th>
                         <td>
-                            <select id="pickup_province" name="pickup_province" style="width: 100%;">
-                                <option value="">-- Chọn tỉnh --</option>
-                                <?php 
-                                $provinces = Location_Service::get_provinces();
-                                foreach ($provinces as $p):
-                                ?>
-                                    <option value="<?= esc_attr($p['code']) ?>">
-                                        <?= esc_html($p['name']) ?>
+                            <select id="pickup_province" name="pickup_province" style="width:100%;">
+                                <option value=""><?php _e('-- Chọn tỉnh --', 'supership'); ?></option>
+                                <?php foreach (Location_Service::get_provinces() as $p): ?>
+                                    <option value="<?= esc_attr($p['code']); ?>">
+                                        <?= esc_html($p['name']); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <th><span style="color: red;">*</span> Quận/Huyện</th>
+                        <th><span style="color:red">*</span> <?php _e('Quận / Huyện', 'supership'); ?></th>
                         <td>
-                            <select id="pickup_district" name="pickup_district" style="width: 100%;">
-                                <option value="">-- Chọn quận/huyện --</option>
+                            <select id="pickup_district" name="pickup_district" style="width:100%;">
+                                <option value=""><?php _e('-- Chọn quận/huyện --', 'supership'); ?></option>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <th><span style="color: red;">*</span> Phường/Xã</th>
+                        <th><span style="color:red">*</span> <?php _e('Phường / Xã', 'supership'); ?></th>
                         <td>
-                            <select id="pickup_commune" name="pickup_commune" style="width: 100%;" >
-                                <option value="">-- Chọn phường/xã --</option>
+                            <select id="pickup_commune" name="pickup_commune" style="width:100%;">
+                                <option value=""><?php _e('-- Chọn phường/xã --', 'supership'); ?></option>
                             </select>
                         </td>
                     </tr>
-
                 </table>
             </div>
         </div>
 
+        <!-- ================== 2. NGƯỜI NHẬN ================== -->
         <div class="section-box">
-            <h2 class="title">2.  Thông Tin Người Nhận</h2>
+            <h2 class="title"><?php _e('2. Thông Tin Người Nhận', 'supership'); ?></h2>
+
             <table class="form-table">
                 <tr>
-                    <th><span style="color: red;">*</span> Tên người nhận</th>
-                    <td><input type="text" id="name" name="name" class="regular-text"   required style="width: 100%;"></td>
+                    <th><span style="color:red">*</span> <?php _e('Tên người nhận', 'supership'); ?></th>
+                    <td><input type="text" id="name" name="name" required style="width:100%;"></td>
                 </tr>
                 <tr>
-                    <th><span style="color: red;">*</span> SĐT</th>
-                    <td><input type="tel" id="phone" name="phone" class="regular-text" placeholder="0912345678"  required style="width: 100%;"></td>
+                    <th><span style="color:red">*</span> <?php _e('Số điện thoại', 'supership'); ?></th>
+                    <td><input type="tel" id="phone" name="phone" required style="width:100%;"></td>
                 </tr>
                 <tr>
-                    <th><span style="color: red;">*</span> Địa chỉ chi tiết</th>
-                    <td><input type="text" id="address" name="address" class="regular-text" placeholder="Số nhà, tên đường"  required style="width: 100%;"></td>
+                    <th><span style="color:red">*</span> <?php _e('Địa chỉ chi tiết', 'supership'); ?></th>
+                    <td><input type="text" id="address" name="address" required style="width:100%;"></td>
                 </tr>
 
                 <tr>
-                    <th><span style="color: red;">*</span> Tỉnh/Thành Phố</th>
+                    <th>
+                        <span style="color: red;">*</span>
+                        <?php _e('Tỉnh/Thành phố', 'supership'); ?>
+                    </th>
                     <td>
                         <select id="province" name="province" style="width: 100%;" required>
-                            <option value="">-- Chọn tỉnh --</option>
+                            <option value="">
+                                <?php _e('-- Chọn tỉnh --', 'supership'); ?>
+                            </option>
                             <?php 
                             $provinces = Location_Service::get_provinces();
                             foreach ($provinces as $p):
@@ -118,125 +126,229 @@ if (!defined('ABSPATH')) exit;
                 </tr>
 
                 <tr>
-                    <th><span style="color: red;">*</span> Quận/Huyện</th>
+                    <th>
+                        <span style="color: red;">*</span>
+                        <?php _e('Quận/Huyện', 'supership'); ?>
+                    </th>
                     <td>
                         <select id="district" name="district" style="width: 100%;" required>
-                            <option value="">-- Chọn quận/huyện --</option>
+                            <option value="">
+                                <?php _e('-- Chọn quận/huyện --', 'supership'); ?>
+                            </option>
                         </select>
                     </td>
                 </tr>
 
                 <tr>
-                  <th><span style="color: red;">*</span> Phường/Xã</th>
+                    <th>
+                        <span style="color: red;">*</span>
+                        <?php _e('Phường/Xã', 'supership'); ?>
+                    </th>
                     <td>
                         <select id="commune" name="commune" style="width: 100%;">
-                            <option value="">-- Chọn phường/xã --</option>
+                            <option value="">
+                                <?php _e('-- Chọn phường/xã --', 'supership'); ?>
+                            </option>
                         </select>
                     </td>
                 </tr>
             </table>
         </div>
 
-        <div class="section-box">
-            <h2 class="title">3.  Hàng Hóa & Kích Thước</h2>
-            <table class="form-table">
-                <tr>
-                    <th>Mã đơn riêng (SOC)</th>
-                    <td>
-                        <input type="text" id="soc" name="soc" class="regular-text" placeholder="Mã đơn hàng nội bộ của bạn" style="width: 100%;">
-                        <p class="description">Mã tham chiếu đơn hàng nội bộ (nếu có).</p>
-                    </td>
-                </tr>
+       <div class="section-box">
+    <h2 class="title">
+        <?php _e('3. Hàng hóa & Kích thước', 'supership'); ?>
+    </h2>
 
-                <tr>
-                    <th>Mô tả hàng hóa</th>
-                    <td><input type="text" id="product" name="product" class="regular-text" placeholder="VD: Quần áo, Giày dép..." style="width: 100%;"></td>
-                </tr>
+    <table class="form-table">
+        <tr>
+            <th><?php _e('Mã đơn riêng (SOC)', 'supership'); ?></th>
+            <td>
+                <input type="text"
+                       id="soc"
+                       name="soc"
+                       class="regular-text"
+                       placeholder="<?php esc_attr_e('Mã đơn hàng nội bộ của bạn', 'supership'); ?>"
+                       style="width: 100%;">
+                <p class="description">
+                    <?php _e('Mã tham chiếu đơn hàng nội bộ (nếu có).', 'supership'); ?>
+                </p>
+            </td>
+        </tr>
 
-                <tr>
-                    <th>Giá trị đơn hàng (VND)</th>
-                    <td><input type="number" id="value" name="value" class="regular-text" min="0"  placeholder="0" style="width: 100%;"></td>
-                </tr>
+        <tr>
+            <th>
+                <span style="color: red;">*</span>
+                <?php _e('Thông tin sản phẩm', 'supership'); ?>
+            </th>
+            <td>
+                <input type="text"
+                       id="product"
+                       name="product"
+                       class="regular-text"
+                       placeholder="<?php esc_attr_e('VD: Quần áo, Giày dép...', 'supership'); ?>"
+                       style="width: 100%;">
+            </td>
+        </tr>
 
-                <tr>
-                    <th><span style="color: red;">*</span> Khối lượng (gram)</th>
-                    <td>
-                        <input type="number" id="weight" name="weight" class="regular-text"  value ="200" min="1"  required placeholder="VD: 500" style="width: 100%;">
-                    
-                    </td>
-                </tr>
+        <tr>
+            <th><?php _e('Giá trị đơn hàng (VND)', 'supership'); ?></th>
+            <td>
+                <input type="number"
+                       id="value"
+                       name="value"
+                       class="regular-text"
+                       min="0"
+                       placeholder="0"
+                       style="width: 100%;">
+            </td>
+        </tr>
 
-                <tr>
-                    <th>Kích thước (cm)</th>
-                    <td>
-                        <div class="dimension-box">
-                            <input type="number" id="length" name="length" value="0" min="0" placeholder="Dài">
-                            <input type="number" id="width" name="width" value="0" min="0" placeholder="Rộng">
-                            <input type="number" id="height" name="height" value="0" min="0" placeholder="Cao">
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <tr>
+            <th>
+                <span style="color: red;">*</span>
+                <?php _e('Khối lượng (gram)', 'supership'); ?>
+            </th>
+            <td>
+                <input type="number"
+                       id="weight"
+                       name="weight"
+                       class="regular-text"
+                       value="200"
+                       min="1"
+                       required
+                       placeholder="<?php esc_attr_e('VD: 500', 'supership'); ?>"
+                       style="width: 100%;">
+            </td>
+        </tr>
 
-        <div class="section-box">
-            <h2 class="title">4. Thanh Toán & Tùy Chọn</h2>
-            <table class="form-table">
-                <tr>
-                    <th><span style="color: red;">*</span> COD Amount (VND)</th>
-                    <td>
-                        <input type="number" id="amount" name="amount" class="regular-text" min="0"  placeholder="0" style="width: 100%;">
-                        <p class="description">Số tiền thu hộ khách hàng.</p>
-                    </td>
-                </tr>
+        <tr>
+            <th><?php _e('Kích thước (cm)', 'supership'); ?></th>
+            <td>
+                <div class="dimension-box">
+                    <input type="number"
+                           id="length"
+                           name="length"
+                           value="0"
+                           min="0"
+                           placeholder="<?php esc_attr_e('Dài', 'supership'); ?>">
+                    <input type="number"
+                           id="width"
+                           name="width"
+                           value="0"
+                           min="0"
+                           placeholder="<?php esc_attr_e('Rộng', 'supership'); ?>">
+                    <input type="number"
+                           id="height"
+                           name="height"
+                           value="0"
+                           min="0"
+                           placeholder="<?php esc_attr_e('Cao', 'supership'); ?>">
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
 
-                <tr>
-                    <th>Người trả phí</th>
-                    <td>
-                        <select id="payer" name="payer" style="width: 100%;">
-                            <option value="1"> Người gửi (Shop)</option>
-                            <option value="2"> Người nhận (Khách hàng)</option>
-                        </select>
-                    </td>
-                </tr>
+<div class="section-box">
+    <h2 class="title">
+        <?php _e('4. Thanh toán & Tùy chọn', 'supership'); ?>
+    </h2>
 
-                <tr>
-                    <th>Cho xem/thử hàng</th>
-                    <td>
-                        <select id="config" name="config" style="width: 100%;">
-                            <option value="1"> Xem hàng không thử</option>
-                            <option value="2"> Được thử hàng</option>
-                            <option value="3"> Không cho xem</option>
-                        </select>
-                    </td>
-                </tr>
+    <table class="form-table">
+        <tr>
+            <th>
+                <span style="color: red;">*</span>
+                <?php _e('COD (VND)', 'supership'); ?>
+            </th>
+            <td>
+                <input type="number"
+                       id="amount"
+                       name="amount"
+                       class="regular-text"
+                       min="0"
+                       placeholder="0"
+                       style="width: 100%;">
+                <p class="description">
+                    <?php _e('Số tiền thu hộ khách hàng.', 'supership'); ?>
+                </p>
+            </td>
+        </tr>
 
-                <tr>
-                    <th>Đổi/Lấy hàng về</th>
-                    <td>
-                        <select id="barter" name="barter" style="width: 100%;">
-                            <option value="">Không</option>
-                            <option value="1">Có (Hỗ trợ đổi hàng và trả hàng về)</option>
-                        </select>
-                        <p class="description">Tùy chọn cho phép đổi hoặc lấy hàng về (nếu có).</p>
-                    </td>
-                </tr>
+        <tr>
+            <th>
+                <span style="color: red;">*</span>
+                <?php _e('Người trả phí', 'supership'); ?>
+            </th>
+            <td>
+                <select id="payer" name="payer" style="width: 100%;">
+                    <option value="1">
+                        <?php _e('Người gửi (Shop)', 'supership'); ?>
+                    </option>
+                    <option value="2">
+                        <?php _e('Người nhận (Khách hàng)', 'supership'); ?>
+                    </option>
+                </select>
+            </td>
+        </tr>
 
-                <tr>
-                    <th>Ghi chú</th>
-                    <td>
-                        <textarea id="note" name="note" class="regular-text" rows="3" placeholder="Giao giờ hành chính, gọi trước khi giao,..." style="width: 100%;"></textarea>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <tr>
+            <th>
+                <span style="color: red;">*</span>
+                <?php _e('Cho xem thử hàng', 'supership'); ?>
+            </th>
+            <td>
+                <select id="config" name="config" style="width: 100%;">
+                    <option value="1">
+                        <?php _e('Xem hàng không thử', 'supership'); ?>
+                    </option>
+                    <option value="2">
+                        <?php _e('Được thử hàng', 'supership'); ?>
+                    </option>
+                    <option value="3">
+                        <?php _e('Không cho xem', 'supership'); ?>
+                    </option>
+                </select>
+            </td>
+        </tr>
 
-        <div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
-            <button type="submit" class="button button-primary button-large" style="font-size: 18px; padding: 15px 40px; height: auto;">
-                ✅ Tạo Đơn Hàng SuperShip
-            </button>
-        </div>
-    </form>
+        <tr>
+            <th><?php _e('Đổi/Lấy hàng về', 'supership'); ?></th>
+            <td>
+                <select id="barter" name="barter" style="width: 100%;">
+                    <option value="">
+                        <?php _e('Không', 'supership'); ?>
+                    </option>
+                    <option value="1">
+                        <?php _e('Có (Hỗ trợ đổi hàng và trả hàng về)', 'supership'); ?>
+                    </option>
+                </select>
+                <p class="description">
+                    <?php _e('Tùy chọn cho phép đổi hoặc lấy hàng về (nếu có).', 'supership'); ?>
+                </p>
+            </td>
+        </tr>
+
+        <tr>
+            <th><?php _e('Ghi chú', 'supership'); ?></th>
+            <td>
+                <textarea id="note"
+                          name="note"
+                          class="regular-text"
+                          rows="3"
+                          placeholder="<?php esc_attr_e('Giao giờ hành chính, gọi trước khi giao,...', 'supership'); ?>"
+                          style="width: 100%;"></textarea>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
+    <button type="submit"
+            class="button button-primary button-large"
+            style="font-size: 18px; padding: 15px 40px; height: auto;">
+        <?php _e('Tạo đơn hàng SuperShip', 'supership'); ?>
+    </button>
 </div>
 
 <style>
@@ -459,37 +571,37 @@ jQuery(function($){
         let required_filled = true;
 
         if (!$('#name').val()) {
-        alert("⚠️ Vui lòng nhập Tên Người Nhận!");
+        ssAlert("⚠️ Vui lòng nhập Tên Người Nhận!");
         $('#name').focus();
         return;
     }
 
     if (!$('#phone').val()) {
-        alert("⚠️ Vui lòng nhập Số Điện Thoại Người Nhận!");
+        ssAlert("⚠️ Vui lòng nhập Số Điện Thoại Người Nhận!");
         $('#phone').focus();
         return;
     }
 
     if (!$('#address').val()) {
-        alert("⚠️ Vui lòng nhập Địa Chỉ Chi Tiết Người Nhận!");
+        ssAlert("⚠️ Vui lòng nhập Địa Chỉ Chi Tiết Người Nhận!");
         $('#address').focus();
         return;
     }
 
     if (!$('#province').val()) {
-        alert("⚠️ Vui lòng chọn Tỉnh/Thành Phố Người Nhận!");
+        ssAlert("⚠️ Vui lòng chọn Tỉnh/Thành Phố Người Nhận!");
         $('#province').focus();
         return;
     }
 
     if (!$('#district').val()) {
-        alert("⚠️ Vui lòng chọn Quận/Huyện Người Nhận!");
+        ssAlert("⚠️ Vui lòng chọn Quận/Huyện Người Nhận!");
         $('#district').focus();
         return;
     }
 
     if (!$('#commune').val()) {
-        alert("⚠️ Vui lòng chọn Phường/Xã Người Nhận!");
+        ssAlert("⚠️ Vui lòng chọn Phường/Xã Người Nhận!");
         $('#commune').focus();
         return;
     }
@@ -503,37 +615,37 @@ jQuery(function($){
         if (!pickup_code) {
 
             if (!$('#pickup_name').val()) {
-                alert("⚠️ Vui lòng nhập Tên Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng nhập Tên Kho Lấy Hàng!");
                 $('#pickup_name').focus();
                 return;
             }
 
             if (!$('#pickup_phone').val()) {
-                alert("⚠️ Vui lòng nhập SĐT Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng nhập SĐT Kho Lấy Hàng!");
                 $('#pickup_phone').focus();
                 return;
             }
 
             if (!$('#pickup_address').val()) {
-                alert("⚠️ Vui lòng nhập Địa Chỉ Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng nhập Địa Chỉ Kho Lấy Hàng!");
                 $('#pickup_address').focus();
                 return;
             }
 
             if (!$('#pickup_province').val()) {
-                alert("⚠️ Vui lòng chọn Tỉnh/Thành Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng chọn Tỉnh/Thành Kho Lấy Hàng!");
                 $('#pickup_province').focus();
                 return;
             }
 
             if (!$('#pickup_district').val()) {
-                alert("⚠️ Vui lòng chọn Quận/Huyện Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng chọn Quận/Huyện Kho Lấy Hàng!");
                 $('#pickup_district').focus();
                 return;
             }
 
             if (!$('#pickup_commune').val()) {
-                alert("⚠️ Vui lòng chọn Phường/Xã Kho Lấy Hàng!");
+                ssAlert("⚠️ Vui lòng chọn Phường/Xã Kho Lấy Hàng!");
                 $('#pickup_commune').focus();
                 return;
             }
@@ -543,7 +655,7 @@ jQuery(function($){
         // 3. KIỂM TRA KHỐI LƯỢNG
         // ===============================
         if (!$('#weight').val() || $('#weight').val() <= 0) {
-            alert("⚠️ Vui lòng nhập Khối Lượng hợp lệ (>0)!");
+            ssAlert("⚠️ Vui lòng nhập Khối Lượng hợp lệ (>0)!");
             $('#weight').focus();
             return;
         }
@@ -557,7 +669,7 @@ jQuery(function($){
         });
 
         if (!required_filled) {
-            alert(' Vui lòng điền đầy đủ các trường bắt buộc (*)!');
+            ssAlert(' Vui lòng điền đầy đủ các trường bắt buộc (*)!');
             return false;
         }
 

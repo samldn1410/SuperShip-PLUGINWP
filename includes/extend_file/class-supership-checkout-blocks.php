@@ -1,118 +1,108 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class Checkout_Blocks {
+class Supership_Checkout_Blocks {
 
     public static function init() {
 
+        // Đăng ký field cho WooCommerce Blocks
         add_action('woocommerce_init', [__CLASS__, 'register_fields']);
 
-        // Save changes from AJAX
-      add_action('wp_ajax_blocks_load_districts', [__CLASS__, 'load_districts']);
-    add_action('wp_ajax_nopriv_blocks_load_districts', [__CLASS__, 'load_districts']);
+        // Ẩn field mặc định VN
+        add_filter('woocommerce_get_country_locale',  [__CLASS__, 'customize_vn_locale']);
+        //  add_action('woocommerce_store_api_checkout_update_order_from_request', [__CLASS__, 'validate_fields'], 10, 2);
+        // AJAX load huyện
+        add_action('wp_ajax_load_districts',        [__CLASS__, 'load_districts']);
+        add_action('wp_ajax_nopriv_load_districts', [__CLASS__, 'load_districts']);
 
-    add_action('wp_ajax_blocks_load_communes', [__CLASS__, 'load_communes']);
-    add_action('wp_ajax_nopriv_blocks_load_communes', [__CLASS__, 'load_communes']);
-    
-     // FIX chính – REST API cho WooCommerce Blocks
-        add_action('rest_api_init', [__CLASS__, 'register_rest_routes']);
-       add_filter('woocommerce_get_country_locale', function( $locale ) {
-
-	// Thay DZ → VN
-	$locale['VN']['address_1'] = [
-		'required' => false,
-		'hidden'   => true,
-	];
-
-	$locale['VN']['postcode'] = [
-		'required' => false,
-		'hidden'   => true,
-	];
-
-	$locale['VN']['city'] = [
-		'required' => false,
-		'hidden'   => true,
-	];
-
-	$locale['VN']['company'] = [
-		'required' => false,
-		'hidden'   => true,
-	];
-
-	$locale['VN']['state'] = [
-		'required' => false,
-		'hidden'   => true,
-	];
-
-	// $locale['VN']['phone'] = [
-	// 	'required' => false,
-	// 	'hidden'   => true,
-	// ];
-
-	return $locale;
-   });
-        add_action('wp_ajax_load_communes', [__CLASS__, 'load_communes']);
+        add_action('wp_ajax_load_communes',        [__CLASS__, 'load_communes']);
         add_action('wp_ajax_nopriv_load_communes', [__CLASS__, 'load_communes']);
     }
 
+    /**
+     * 1. Ẩn các field mặc định của WooCommerce VN
+     */
+    public static function customize_vn_locale($locale) {
+
+        $fields_to_hide = ['address_1', 'postcode', 'city', 'company', 'state'];
+
+        foreach ($fields_to_hide as $f) {
+            $locale['VN'][$f] = [
+                'required' => false,
+                'hidden'   => true,
+            ];
+        }
+
+        return $locale;
+    }
+//     public static function validate_fields($order, $request) {
+//     $district = $request['extensions']['supership/district'] ?? '';
+//     $commune = $request['extensions']['supership/commune'] ?? '';
+    
+//     if (empty($district)) {
+//         throw new \Exception('Vui lòng chọn Quận/Huyện');
+//     }
+//     if (empty($commune)) {
+//         throw new \Exception('Vui lòng chọn Phường/Xã');
+//     }
+// }
+    /**
+     * 2. Đăng ký Field cho Checkout Blocks
+     */
     public static function register_fields() {
 
-         // Address detail
-        //  woocommerce_register_additional_checkout_field([
-        //     'id'       => 'supership/name',
-        //     'label'    => 'Họ và tên',
-        //     'location' => 'address',
-        //     'type'     => 'text',
-        //     'required' => true,
-        // ]);
-        woocommerce_register_additional_checkout_field([
+        // Địa chỉ chi tiết
+         woocommerce_register_additional_checkout_field([
             'id'       => 'supership/address_detail',
-            'label'    => 'Địa chỉ chi tiết',
+            'label'    => __('Địa chỉ chi tiết', 'supership'),
             'location' => 'address',
             'type'     => 'text',
             'required' => true,
         ]);
-         // Commune
+
+        // Tỉnh / Thành phố
         woocommerce_register_additional_checkout_field([
-            'id'       => 'supership/commune',
-            'label'    => 'Phường / Xã',
+            'id'       => 'supership/province',
+            'label'    => __('Tỉnh / Thành phố', 'supership'),
             'location' => 'address',
-            'type'     => 'text',
+            'type'     => 'select',
             'required' => true,
-            // 'options'  => ["Xã 1", "Xã 2"],
-            // 'placeholder' => 'Chọn phường/xã'
+            'options'  => self::province_options(),
         ]);
-        // District
+
+        // Quận / Huyện
         woocommerce_register_additional_checkout_field([
-            'id'          => 'supership/district',
-            'label'       => 'Quận / Huyện',
-            'location'    => 'address',
-            'type'        => 'text',
-            'required'    => true,
-            // 'options'     => [],
-            // 'placeholder' => 'Chọn quận/huyện'
+            'id'        => 'supership/district',
+            'namespace' => 'supership',
+            'label'     => __('Quận / Huyện', 'supership'),
+            'location'  => 'address',
+            'type'      => 'text', 
+            'required'  => true,
+            'attributes' => [
+                'readonly' => true,
+            ],
         ]);
 
-       
-
-        // Province
+        // Phường / Xã
         woocommerce_register_additional_checkout_field([
-            'id'          => 'supership/province',
-            'label'       => 'Tỉnh / Thành phố',
-            'location'    => 'address',
-            'type'        => 'select',
-            'required'    => true,
-            'options'     => self::province_options(),
-            'placeholder' => 'Chọn tỉnh'
+            'id'        => 'supership/commune',
+            'namespace' => 'supership',
+            'label'     => __('Phường / Xã', 'supership'),
+            'location'  => 'address',
+            'type'      => 'text', 
+            'required'  => true,
+            'attributes' => [
+                'readonly' => true,
+            ],
         ]);
-
-        
-       
     }
 
+    /**
+     * 3. Load Tỉnh (Province)
+     */
     private static function province_options() {
         $prov = Location_Service::get_provinces();
-        $opt = [];
+        $opt  = [];
 
         foreach ($prov as $p){
             $opt[] = [
@@ -122,76 +112,24 @@ class Checkout_Blocks {
         }
         return $opt;
     }
-public static function load_districts() {
-        $code = sanitize_text_field($_POST['province_code'] ?? '');
-        $districts = Location_Service::get_districts($code);
-
-        $options = [['value' => '', 'label' => 'Chọn quận/huyện']];
-        foreach ($districts as $d) {
-            $options[] = ['value' => $d['code'], 'label' => $d['name']];
-        }
-
-        wp_send_json(['options' => $options]);
-    }
-
-    public static function load_communes() {
-        $code = sanitize_text_field($_POST['district_code'] ?? '');
-        $communes = Location_Service::get_communes($code);
-
-        $options = [['value' => '', 'label' => 'Chọn phường/xã']];
-        foreach ($communes as $c) {
-            $options[] = ['value' => $c['code'], 'label' => $c['name']];
-        }
-
-        wp_send_json(['options' => $options]);
-    }
-
 
     /**
-     * === REST API FOR CHECKOUT BLOCKS (CHUẨN, KHÔNG LỖI) ===
+     * 4. AJAX: Load Quận/Huyện
      */
-    public static function register_rest_routes() {
-
-        register_rest_route('supership/v1', '/districts', [
-            'methods'  => 'GET',
-            'callback' => function($req) {
-
-                $code = sanitize_text_field($req->get_param('province_code'));
-                $districts = Location_Service::get_districts($code);
-
-                $options = [['value' => '', 'label' => 'Chọn quận/huyện']];
-                foreach ($districts as $d) {
-                    $options[] = [
-                        'value' => $d['code'],
-                        'label' => $d['name']
-                    ];
-                }
-
-                return ['options' => $options];
-            },
-            'permission_callback' => '__return_true'
-        ]);
-
-        register_rest_route('supership/v1', '/communes', [
-            'methods'  => 'GET',
-            'callback' => function($req) {
-
-                $code = sanitize_text_field($req->get_param('district_code'));
-                $communes = Location_Service::get_communes($code);
-
-                $options = [['value' => '', 'label' => 'Chọn phường/xã']];
-                foreach ($communes as $c) {
-                    $options[] = [
-                        'value' => $c['code'],
-                        'label' => $c['name']
-                    ];
-                }
-
-                return ['options' => $options];
-            },
-            'permission_callback' => '__return_true'
+    public static function load_districts() {
+        $province = sanitize_text_field($_POST['province_code'] ?? '');
+        wp_send_json([
+            'districts' => Location_Service::get_districts($province)
         ]);
     }
 
-
+    /**
+     * 5. AJAX: Load Phường/Xã
+     */
+    public static function load_communes() {
+        $district = sanitize_text_field($_POST['district_code'] ?? '');
+        wp_send_json([
+            'communes' => Location_Service::get_communes($district)
+        ]);
+    }
 }

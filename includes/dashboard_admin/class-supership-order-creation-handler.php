@@ -5,7 +5,6 @@ class Order_Creation_Handler {
 
     public static function create_supership_order($wc_order) {
         $order_id = $wc_order->get_id();
-        // 1. LẤY DATA & VALIDATE
         $data = self::get_order_data($wc_order, $order_id);
 
         if (!$data['success']) {
@@ -63,22 +62,18 @@ class Order_Creation_Handler {
             ];
         }
     }
+
     private static function get_order_data($wc_order, $order_id) {
         if (!class_exists('WC_Custom_Fields') || !class_exists('Warehouses_Service')) {
             return ['success' => false, 'message' => 'Lớp helper/dịch vụ cần thiết không tồn tại.', 'details' => []];
         }
-     
         $receiver_name = trim($wc_order->get_shipping_first_name() . ' ' . $wc_order->get_shipping_last_name());
         $receiver_phone = trim($wc_order->get_billing_phone());
-    
         $order = wc_get_order($order_id);
-
         $receiver_address = "219/4 Lê Văn Chí";
         $receiver_province_name  = "Thành Phố Hồ Chí Minh";
         $receiver_district_name  = "Quận Thủ Đức";
         $receiver_commune_name  = "Phường Linh Trung";
-
-        
         if (!$receiver_name || !$receiver_phone || !$receiver_address || !$receiver_province_name || !$receiver_district_name || !$receiver_commune_name) {
             return ['success' => false, 'message' => 'Thông tin người nhận không đầy đủ. Vui lòng kiểm tra địa chỉ chi tiết.', 'details' => []];
         }
@@ -110,8 +105,7 @@ class Order_Creation_Handler {
         ];
     }
 
-
-    private static function calculate_product_weight($wc_order) {
+    public static function calculate_product_weight($wc_order) {
         $products_payload = [];
         $weight_gram = 0;
 

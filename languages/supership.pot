@@ -1,0 +1,616 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: SuperShip 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-08 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Manual\n"
+
+#: views/webhook-settings.php
+msgid "Không xác định"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Cập nhật webhook thành công!"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Lỗi cập nhật webhook: %s"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Thành công"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Lỗi"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "OK"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Cấu Hình Webhook SuperShip"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Webhook Hiện Tại"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Webhook URL"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Chưa đăng ký"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Thời Gian Tạo"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Thời Gian Cập Nhật"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Trạng Thái API"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "Cập Nhật Webhook"
+msgstr ""
+
+#: views/webhook-settings.php
+msgid "SuperShip sẽ gửi cập nhật đơn hàng về địa chỉ:"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Danh sách kho hàng"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Tạo kho mới"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Mã kho"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Tên kho"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Địa chỉ"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Cấu hình kho"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Thao tác"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Không có kho hàng nào"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Kho mặc định"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Kho thường"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Sửa"
+msgstr ""
+
+#: views/warehouse.php
+msgid "« Trước"
+msgstr ""
+
+#: views/warehouse.php
+msgid "Sau »"
+msgstr ""
+
+#: views/settings.php
+msgid "Đã lưu API Token thành công!"
+msgstr ""
+
+#: views/settings.php
+msgid "Thành công"
+msgstr ""
+
+#: views/settings.php
+msgid "SuperShip – API Token"
+msgstr ""
+
+#: views/settings.php
+msgid "API Token"
+msgstr ""
+
+#: views/settings.php
+msgid "Dán Access Token của SuperShip vào đây"
+msgstr ""
+
+#: views/settings.php
+msgid "Hiện / Ẩn Token"
+msgstr ""
+
+#: views/settings.php
+msgid "Lấy API Token của bạn tại:"
+msgstr ""
+
+#: views/settings.php
+msgid "Lưu API Token"
+msgstr ""
+
+
+#: views/create-order.php
+msgid "Tạo Đơn SuperShip"
+msgstr ""
+
+#: views/create-order.php
+msgid "1. Kho Lấy Hàng"
+msgstr ""
+
+#: views/create-order.php
+msgid "Chọn kho"
+msgstr ""
+
+#: views/create-order.php
+msgid "-- Không chọn, nhập thủ công --"
+msgstr ""
+
+#: views/create-order.php
+msgid "Nếu không chọn, hãy nhập thông tin kho thủ công bên dưới."
+msgstr ""
+
+#: views/create-order.php
+msgid "Tên kho (người gửi)"
+msgstr ""
+
+#: views/create-order.php
+msgid "SĐT kho"
+msgstr ""
+
+#: views/create-order.php
+msgid "Địa chỉ kho"
+msgstr ""
+
+#: views/create-order.php
+msgid "Tỉnh / Thành phố"
+msgstr ""
+
+#: views/create-order.php
+msgid "-- Chọn tỉnh --"
+msgstr ""
+
+#: views/create-order.php
+msgid "Quận / Huyện"
+msgstr ""
+
+#: views/create-order.php
+msgid "-- Chọn quận/huyện --"
+msgstr ""
+
+#: views/create-order.php
+msgid "Phường / Xã"
+msgstr ""
+
+#: views/create-order.php
+msgid "-- Chọn phường/xã --"
+msgstr ""
+
+#: views/create-order.php
+msgid "2. Thông Tin Người Nhận"
+msgstr ""
+
+#: views/create-order.php
+msgid "Tên người nhận"
+msgstr ""
+
+#: views/create-order.php
+msgid "Số điện thoại"
+msgstr ""
+
+#: views/create-order.php
+msgid "Địa chỉ chi tiết"
+msgstr ""
+
+#: views/create-order.php
+msgid "Tỉnh/Thành phố"
+msgstr ""
+
+#: views/create-order.php
+msgid "Quận/Huyện"
+msgstr ""
+
+#: views/create-order.php
+msgid "Phường/Xã"
+msgstr ""
+
+#: views/create-order.php
+msgid "3. Hàng hóa & Kích thước"
+msgstr ""
+
+#: views/create-order.php
+msgid "Mã đơn riêng (SOC)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Mã đơn hàng nội bộ của bạn"
+msgstr ""
+
+#: views/create-order.php
+msgid "Mã tham chiếu đơn hàng nội bộ (nếu có)."
+msgstr ""
+
+#: views/create-order.php
+msgid "Thông tin sản phẩm"
+msgstr ""
+
+#: views/create-order.php
+msgid "VD: Quần áo, Giày dép..."
+msgstr ""
+
+#: views/create-order.php
+msgid "Giá trị đơn hàng (VND)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Khối lượng (gram)"
+msgstr ""
+
+#: views/create-order.php
+msgid "VD: 500"
+msgstr ""
+
+#: views/create-order.php
+msgid "Kích thước (cm)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Dài"
+msgstr ""
+
+#: views/create-order.php
+msgid "Rộng"
+msgstr ""
+
+#: views/create-order.php
+msgid "Cao"
+msgstr ""
+
+#: views/create-order.php
+msgid "4. Thanh toán & Tùy chọn"
+msgstr ""
+
+#: views/create-order.php
+msgid "COD (VND)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Số tiền thu hộ khách hàng."
+msgstr ""
+
+#: views/create-order.php
+msgid "Người trả phí"
+msgstr ""
+
+#: views/create-order.php
+msgid "Người gửi (Shop)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Người nhận (Khách hàng)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Cho xem thử hàng"
+msgstr ""
+
+#: views/create-order.php
+msgid "Xem hàng không thử"
+msgstr ""
+
+#: views/create-order.php
+msgid "Được thử hàng"
+msgstr ""
+
+#: views/create-order.php
+msgid "Không cho xem"
+msgstr ""
+
+#: views/create-order.php
+msgid "Đổi/Lấy hàng về"
+msgstr ""
+
+#: views/create-order.php
+msgid "Không"
+msgstr ""
+
+#: views/create-order.php
+msgid "Có (Hỗ trợ đổi hàng và trả hàng về)"
+msgstr ""
+
+#: views/create-order.php
+msgid "Tùy chọn cho phép đổi hoặc lấy hàng về (nếu có)."
+msgstr ""
+
+#: views/create-order.php
+msgid "Ghi chú"
+msgstr ""
+
+#: views/create-order.php
+msgid "Giao giờ hành chính, gọi trước khi giao,..."
+msgstr ""
+
+#: views/create-order.php
+msgid "Tạo đơn hàng SuperShip"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Sửa Kho Hàng"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Tên Kho Hàng"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Nhập tên kho hàng"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Số Điện Thoại"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Nhập số điện thoại"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Tên Người Liên Lạc"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Nhập tên người liên lạc"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Thoát"
+msgstr ""
+
+#: views/modals/warehouse-edit.php
+msgid "Cập nhật"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Tạo Kho Hàng"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Tên Kho Hàng"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Nhập tên kho hàng"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Số Điện Thoại"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Nhập số điện thoại"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Tên Người Liên Lạc"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Nhập tên người liên lạc"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Địa Chỉ Kho hàng"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Nhập địa chỉ kho"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Tỉnh / Thành Phố"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Quận / Huyện"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Phường / Xã"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Kho Mặc Định"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Kho Mặc định"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Kho thường"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Hủy"
+msgstr ""
+
+#: views/modals/warehouse-create.php
+msgid "Tạo Kho"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "API Token"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Cấu hình Webhook"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Webhook"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Nhật ký Webhook"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Webhook Logs"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Tạo đơn SuperShip"
+msgstr ""
+
+#: includes/class-admin-menu.php
+msgid "Kho hàng"
+msgstr ""
+
+#: includes/extend_file/class-supership-checkout-blocks.php
+msgid "Địa chỉ chi tiết"
+msgstr ""
+
+#: includes/extend_file/class-supership-checkout-blocks.php
+msgid "Tỉnh / Thành phố"
+msgstr ""
+
+#: includes/extend_file/class-supership-checkout-blocks.php
+msgid "Quận / Huyện"
+msgstr ""
+
+#: includes/extend_file/class-supership-checkout-blocks.php
+msgid "Phường / Xã"
+msgstr ""
+
+#: includes/metabox/class-supership-shipping-metabox.php
+msgid "Thông tin vận chuyển"
+msgstr ""
+
+msgid "Cước phí đơn hàng"
+msgstr ""
+
+msgid "Cấu hình vận đơn"
+msgstr ""
+
+msgid "Hành trình vận đơn"
+msgstr ""
+
+msgid "Tạo đơn SuperShip"
+msgstr ""
+
+msgid "Được giao bởi:"
+msgstr ""
+
+msgid "Mã vận đơn:"
+msgstr ""
+
+msgid "Trạng thái vận đơn:"
+msgstr ""
+
+msgid "Theo dõi đơn hàng"
+msgstr ""
+
+msgid "Làm mới"
+msgstr ""
+
+msgid "Hủy đơn"
+msgstr ""
+
+msgid "Người gửi"
+msgstr ""
+
+msgid "Người nhận"
+msgstr ""
+
+msgid "Cho xem hàng (Không thử)"
+msgstr ""
+
+msgid "Cho thử hàng"
+msgstr ""
+
+msgid "Không cho xem hàng"
+msgstr ""
+
+msgid "Tốc hành"
+msgstr ""
+
+msgid "Người trả phí:"
+msgstr ""
+
+msgid "Cho xem hàng:"
+msgstr ""
+
+msgid "Gói dịch vụ:"
+msgstr ""
+
+msgid "Đổi / Lấy hàng về:"
+msgstr ""
+
+msgid "Có"
+msgstr ""
+
+msgid "Không"
+msgstr ""
+
+msgid "Cước phí giao hàng:"
+msgstr ""
+
+msgid "Cước phí bảo hiểm:"
+msgstr ""
+
+msgid "Thời gian dự kiến lấy hàng:"
+msgstr ""
+
+msgid "Thời gian dự kiến giao hàng:"
+msgstr ""
+
+msgid "Chưa có dữ liệu hành trình vận đơn."
+msgstr ""
+
+msgid "Không có lịch sử vận đơn."
+msgstr ""
+
+msgid "Đơn hàng không tồn tại."
+msgstr ""
+
+msgid "Chưa load Store_Address_Extended."
+msgstr ""
+
+msgid "Chưa cấu hình tỉnh / quận cửa hàng."
+msgstr ""
+
+msgid "Thiếu địa chỉ người nhận."
+msgstr ""
+
+msgid "Không tìm thấy Order_Creation_Handler."
+msgstr ""
+
+msgid "Không tính được trọng lượng đơn hàng."
+msgstr ""

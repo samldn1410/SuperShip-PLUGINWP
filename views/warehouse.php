@@ -1,11 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
 <?php
-/**
- * ==============================
- * LOAD DATA (WITH CACHE)
- * ==============================
- */
 $cache_key = 'supership_warehouses_list';
 $list = get_transient($cache_key);
 if ($list === false) {
@@ -13,11 +8,7 @@ if ($list === false) {
     $list = $res['results'] ?? [];
     set_transient($cache_key, $list, 5 * MINUTE_IN_SECONDS);
 }
-/**
- * ==============================
- * PAGINATION
- * ==============================
- */
+
 $per_page = 50;
 $total    = count($list);
 $pages    = max(1, ceil($total / $per_page));
@@ -26,27 +17,28 @@ $current  = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
 $offset     = ($current - 1) * $per_page;
 $paged_list = array_slice($list, $offset, $per_page);
 ?>
+
 <div class="wrap">
-    <h1 style="margin-bottom:15px;">Warehouses</h1>
+    <h1 style="margin-bottom:15px;">
+        <?php echo esc_html__('Danh sách kho hàng', 'supership'); ?>
+    </h1>
 
     <button
         id="wh-open-create-modal"
         class="button button-primary"
         style="margin-bottom:10px;"
     >
-        <i style="margin-right:6px; "></i>
-        Create Warehouse
+        <?php echo esc_html__('Tạo kho mới', 'supership'); ?>
     </button>
-
 
     <table class="wp-list-table widefat fixed striped table-view-list">
         <thead>
         <tr>
-            <th width="120">Code</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th width="120">Primary</th>
-            <th width="120">Actions</th>
+            <th width="120"><?php echo esc_html__('Mã kho', 'supership'); ?></th>
+            <th><?php echo esc_html__('Tên kho', 'supership'); ?></th>
+            <th><?php echo esc_html__('Địa chỉ', 'supership'); ?></th>
+            <th width="120"><?php echo esc_html__('Cấu hình kho', 'supership'); ?></th>
+            <th width="120"><?php echo esc_html__('Thao tác', 'supership'); ?></th>
         </tr>
         </thead>
 
@@ -54,7 +46,7 @@ $paged_list = array_slice($list, $offset, $per_page);
         <?php if (empty($paged_list)): ?>
             <tr>
                 <td colspan="5" style="text-align:center; padding:20px;">
-                    No warehouses found
+                    <?php echo esc_html__('Không có kho hàng nào', 'supership'); ?>
                 </td>
             </tr>
         <?php else: ?>
@@ -77,19 +69,15 @@ $paged_list = array_slice($list, $offset, $per_page);
 
                     <td>
                         <?php if (($w['primary'] ?? 0) == 1): ?>
-                            <strong>Default</strong>
+                            <strong><?php echo esc_html__('Kho mặc định', 'supership'); ?></strong>
                         <?php else: ?>
-                            Normal
+                            <?php echo esc_html__('Kho thường', 'supership'); ?>
                         <?php endif; ?>
                     </td>
 
                     <td>
-                        <a
-                            href="#"
-                            class="button button-small wh-edit-btn"
-                        >
-                            <i style="margin-right:4px;"></i>
-                            Edit
+                        <a href="#" class="button button-small wh-edit-btn">
+                            <?php echo esc_html__('Sửa', 'supership'); ?>
                         </a>
                     </td>
                 </tr>
@@ -105,8 +93,8 @@ $paged_list = array_slice($list, $offset, $per_page);
                 echo paginate_links([
                     'base'      => add_query_arg('paged', '%#%'),
                     'format'    => '',
-                    'prev_text' => '« Previous',
-                    'next_text' => 'Next »',
+                    'prev_text' => esc_html__('« Trước', 'supership'),
+                    'next_text' => esc_html__('Sau »', 'supership'),
                     'total'     => $pages,
                     'current'   => $current,
                 ]);

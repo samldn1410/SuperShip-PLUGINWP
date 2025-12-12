@@ -139,3 +139,6 @@
     from { transform: translateY(-50%) rotate(0deg); }
     to   { transform: translateY(-50%) rotate(360deg); }
 }
+.swal2-container {
+    z-index: 200000 !important;
+}

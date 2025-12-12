@@ -19,9 +19,8 @@ class WC_Custom_Fields {
             'receiver_province' => 'receiver_province',
             'receiver_district' => 'receiver_district',
             'receiver_commune' => 'receiver_commune',
-            'order_code' => 'order_code', // Giữ lại để có thể đọc mã đơn qua API
+            'order_code' => 'order_code', 
         ];
-
         foreach ($fields as $meta_key => $rest_name) {
             register_rest_field('shop_order', $rest_name, [
                 'get_callback' => function ($order) use ($meta_key) {
@@ -37,27 +36,20 @@ class WC_Custom_Fields {
             ]);
         }
     }
-
     public static function get_field($order_id, $field_name) {
     return get_post_meta($order_id, $field_name, true);
     }
-
     public static function save_field($order_id, $field_name, $value) {
         update_post_meta($order_id, $field_name, $value);
     }
-
-
     public static function get_pickup_code($order_id) {
         $pickup_code = get_post_meta($order_id, 'pickup_code', true);
-        
-        // Nếu chưa set, lấy warehouse default
         if (!$pickup_code && class_exists('Warehouses_Service')) {
             $default_warehouse = Warehouses_Service::get_default();
             if ($default_warehouse) {
                 $pickup_code = $default_warehouse['code'];
             }
         }
-        
         return $pickup_code;
     }
 }

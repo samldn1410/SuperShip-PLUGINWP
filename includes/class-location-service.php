@@ -87,19 +87,38 @@ class Location_Service {
         }
         return '';
     }
-   public static function parse_formatted_address($formatted) {
-        $parts = array_map('trim', explode(',', $formatted));
 
-        // Lấy từ phải sang trái theo đúng format Supership trả về
-        $province = $parts[count($parts) - 1] ?? '';
-        $district = $parts[count($parts) - 2] ?? '';
-        $commune  = $parts[count($parts) - 3] ?? '';
+    // Load address json
+    private static $local = null;
+    private static function load_local_data() {
+        if (self::$local !== null) {
+            return self::$local;
+        }
+        // Đường dẫn đến file JSON
+        $file = plugin_dir_path(__FILE__) . '../../assets/data/address.json';
 
-        return [
-            'province' => $province,
-            'district' => $district,
-            'commune'  => $commune,
-        ];
-   }
+        if (file_exists($file)) {
+            self::$local = json_decode(file_get_contents($file), true);
+        } else {
+            self::$local = [
+                'provinces' => [],
+                'districts' => [],
+                'communes'  => []
+            ];
+        }
+        return self::$local;
+    }
+    public static function get_provinces_local() {
+        $data = self::load_local_data();
+        return $data['provinces'] ?? [];
+    }
+    public static function get_districts_local($province_code) {
+        $data = self::load_local_data();
+        return $data['districts'][$province_code] ?? [];
+    }
+    public static function get_communes_local($district_code) {
+        $data = self::load_local_data();
+        return $data['communes'][$district_code] ?? [];
+    }
 
 }

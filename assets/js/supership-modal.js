@@ -8,10 +8,10 @@ jQuery(document).ready(function($) {
     const createBtn = $('#modal-create-btn');
     const orderId = createBtn.data('order-id');
 
-    // 1. Mở Modal và Load nội dung cấu hình (AJAX)
+    // 1. Mở Modal
     $('#create-order-modal-btn').on('click', function(e) {
         e.preventDefault();
-        
+
         modal.show();
         modalBody.html('<p style="text-align:center;">Đang tải cấu hình...</p>');
         createBtn.prop('disabled', true).text('Đang tải...');
@@ -27,14 +27,22 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     modalBody.html(response.data.html);
-                    createBtn.prop('disabled', false).text('✅ Tạo Đơn SuperShip');
+                    createBtn.prop('disabled', false).text('Tạo Đơn SuperShip');
                 } else {
-                    modalBody.html('<p style="color:red; text-align:center;">❌ Lỗi tải cấu hình: ' + (response.data.message || 'Lỗi không xác định') + '</p>');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi tải cấu hình',
+                        text: response.data.message || 'Lỗi không xác định'
+                    });
                     createBtn.prop('disabled', true);
                 }
             },
             error: function() {
-                modalBody.html('<p style="color:red; text-align:center;">❌ Lỗi kết nối Server khi tải cấu hình.</p>');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối Server',
+                    text: 'Không thể tải cấu hình.'
+                });
                 createBtn.prop('disabled', true);
             }
         });
@@ -45,18 +53,16 @@ jQuery(document).ready(function($) {
         modal.hide();
     });
 
-    // Đóng Modal khi click ngoài
     $(window).on('click', function(event) {
         if (event.target == modal[0]) {
             modal.hide();
         }
     });
 
-    // 3. Xử lý Tạo Đơn khi click nút trong Modal (AJAX)
+    // 3. Tạo đơn SuperShip
     createBtn.on('click', function(e) {
         e.preventDefault();
-        
-        // Validation cơ bản (kiểm tra các trường địa chỉ có trống không)
+
         let isValid = true;
         modalBody.find('input[required]').each(function() {
             if ($(this).val().trim() === '') {
@@ -66,90 +72,131 @@ jQuery(document).ready(function($) {
                 $(this).css('border-color', '#ccc');
             }
         });
-        
+
         if (!isValid) {
-            alert('Vui lòng điền đầy đủ thông tin địa chỉ người nhận (Tỉnh/TP, Quận/Huyện, Phường/Xã, Địa chỉ chi tiết).');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng điền đầy đủ địa chỉ người nhận.'
+            });
             return;
         }
 
-        if (!confirm('Bạn có chắc chắn muốn tạo đơn SuperShip với các cấu hình này không?')) {
-            return;
-        }
+        Swal.fire({
+            title: 'Xác nhận tạo đơn?',
+            text: "Bạn có chắc chắn muốn tạo đơn SuperShip?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Tạo đơn',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
 
-        const btn = $(this);
-        btn.prop('disabled', true).text('Đang Tạo Đơn...');
-        
-        // Thêm overlay trong khi tạo đơn
-        modalBody.prepend('<div id="loading-overlay"><p>Đang xử lý tạo đơn...</p></div>');
-        
-        // Lấy dữ liệu từ form trong modal body
-        const form_data = modalBody.find('select, input').serializeArray().reduce(function(obj, item) {
-            obj[item.name] = item.value;
-            return obj;
-        }, {});
+            const btn = createBtn;
+            btn.prop('disabled', true).text('Đang Tạo Đơn...');
 
-        $.ajax({
-            url: modal_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'create_supership_order_ajax',
-                security: modal_ajax.nonce,
-                order_id: orderId,
-                config_data: form_data
-            },
-            success: function(response) {
-                $('#loading-overlay').remove();
-                if (response.success) {
-                    alert(response.data.message + ' Mã đơn: ' + response.data.code);
-                    window.location.href = response.data.redirect_url; // Redirect để refresh trạng thái
-                } else {
-                    let details = response.data.details 
-                    ? JSON.stringify(response.data.details, null, 2)
-                    : (response.data.error_detail || 'Không có chi tiết.');
-                    alert(response.data.message + '\nChi tiết: ' + (response.data.error_detail || JSON.stringify(response.data.raw_details,null, 2)));
-                    console.error('SuperShip API Error:', response.data.raw_details);
-                    btn.prop('disabled', false).text('✅ Tạo Đơn SuperShip');
+            modalBody.prepend('<div id="loading-overlay"><p>Đang xử lý tạo đơn...</p></div>');
+
+            const form_data = modalBody.find('select, input').serializeArray().reduce(function(obj, item) {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+
+            $.ajax({
+                url: modal_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'create_supership_order_ajax',
+                    security: modal_ajax.nonce,
+                    order_id: orderId,
+                    config_data: form_data
+                },
+                success: function(response) {
+                    $('#loading-overlay').remove();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tạo đơn thành công!',
+                            html: `Mã đơn: <b>${response.data.code}</b>`
+                        }).then(() => {
+                            window.location.href = response.data.redirect_url;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Tạo đơn thất bại',
+                            html: response.data.error_detail || 'Lỗi không xác định'
+                        });
+                        btn.prop('disabled', false).text('Tạo Đơn SuperShip');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#loading-overlay').remove();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi kết nối Server',
+                        text: error
+                    });
+                    btn.prop('disabled', false).text('Tạo Đơn SuperShip');
                 }
-            },
-            error: function(xhr, status, error) {
-                $('#loading-overlay').remove();
-                alert('Lỗi kết nối Server khi tạo đơn: ' + error);
-                btn.prop('disabled', false).text('✅ Tạo Đơn SuperShip');
-                console.error('AJAX Error:', xhr.responseText);
-            }
+            });
         });
     });
 });
+
+// Hủy đơn
 jQuery(document).on('click', '.cancel-order', function(e) {
     e.preventDefault();
 
     const orderId = jQuery(this).data('order-id');
     const Code = jQuery(this).data('code');
 
-    if (!confirm("Hủy đơn SuperShip?")) return;
+    Swal.fire({
+        title: 'Xác nhận hủy đơn?',
+        text: 'Bạn chắc chắn muốn hủy đơn SuperShip?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Hủy đơn',
+        cancelButtonText: 'Không'
+    }).then((result) => {
+        if (!result.isConfirmed) return;
 
-    jQuery.ajax({
-        url: modal_ajax.ajax_url,
-        type: "POST",
-        data: {
-            action: "cancel_supership_order",
-            security: modal_ajax.nonce,
-            order_id: orderId,
-            supership_code: Code
-        },
-        success: function(res) {
-            if (res.success) {
-                alert(res.data.message);
-                location.reload();
-            } else {
-                alert("Hủy thất bại: " + (res.data.message || "Lỗi"));
+        jQuery.ajax({
+            url: modal_ajax.ajax_url,
+            type: "POST",
+            data: {
+                action: "cancel_supership_order",
+                security: modal_ajax.nonce,
+                order_id: orderId,
+                supership_code: Code
+            },
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã hủy đơn',
+                        text: res.data.message
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hủy thất bại',
+                        text: res.data.message || 'Lỗi không xác định'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi AJAX',
+                    text: 'Không thể hủy đơn.'
+                });
             }
-        },
-        error: function(xhr) {
-            alert("Lỗi AJAX khi hủy đơn");
-        }
+        });
     });
 });
+
+// Làm mới đơn
 jQuery(document).on("click", ".update-order-info", function(e) {
     e.preventDefault();
 
@@ -164,12 +211,21 @@ jQuery(document).on("click", ".update-order-info", function(e) {
         order_id: orderId
     }, function(response) {
 
-        btn.removeClass("loading").text("🔄 Cập nhật đơn");
+        btn.removeClass("loading").text("Cập nhật đơn");
 
-        alert(response.data.message);
-        location.reload();
+        Swal.fire({
+            icon: 'success',
+            title: 'Cập nhật thành công',
+            text: response.data.message
+        }).then(() => location.reload());
+
     }).fail(function() {
-        btn.removeClass("loading").text("🔄 Cập nhật đơn");
-        alert("Lỗi server khi cập nhật thông tin đơn");
+        btn.removeClass("loading").text("Cập nhật đơn");
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi Server',
+            text: 'Không thể cập nhật đơn.'
+        });
     });
 });

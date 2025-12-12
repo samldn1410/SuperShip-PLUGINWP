@@ -34,6 +34,9 @@ class Warehouse_Ajax {
 
     /** Tạo kho */
     public static function create() {
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
         $data = [
             'name'     => sanitize_text_field($_POST['name']),
             'phone'    => sanitize_text_field($_POST['phone']),
@@ -44,9 +47,21 @@ class Warehouse_Ajax {
             'commune'  => sanitize_text_field($_POST['commune']),
             'primary'  => sanitize_text_field($_POST['primary']),
         ];
-
         $res = Warehouse_API::create($data);
-
+        if (($res['status'] ?? '') !== 'Success') {
+            wp_send_json_error([
+                'message' => $res['message'] ?? 'Lỗi tạo kho!'
+            ]);
+        }
+        if ((int) $data['primary'] === 1) {
+            Store_Address_Extended::set_full_store_address([
+                'address'  => $data['address'],
+                'province' => $data['province'],
+                'district' => $data['district'],
+                'commune'  => $data['commune'],
+            ]);
+        }
+        delete_transient('supership_warehouses_list');
         wp_send_json([
             'success' => $res['status'] === 'Success',
             'message' => $res['status'] === 'Success' ? 'Tạo kho thành công!' : ($res['message'] ?? 'Lỗi tạo kho!')
@@ -55,15 +70,17 @@ class Warehouse_Ajax {
 
     /** Update */
     public static function update() {
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
         $data = [
             'code'    => sanitize_text_field($_POST['code']),
             'name'    => sanitize_text_field($_POST['name']),
             'phone'   => sanitize_text_field($_POST['phone']),
             'contact' => sanitize_text_field($_POST['contact']),
         ];
-
         $res = Warehouse_API::update($data);
-
+        delete_transient('supership_warehouses_list');
         wp_send_json([
             'success' => $res['status'] === 'Success',
             'message' => $res['status'] === 'Success' ? 'Cập nhật kho thành công!' : ($res['message'] ?? 'Lỗi cập nhật kho!')

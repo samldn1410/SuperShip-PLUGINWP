@@ -7,29 +7,35 @@ class Store_Address_Extended {
         add_filter('woocommerce_general_settings', [__CLASS__, 'add_fields']);
     }
     public static function add_fields($settings) {
-        $new_fields = [
-             [
-                'title' => 'Địa Chỉ Chi Tiết',
-                'id'    => 'store_address',
-                'type'  => 'text',
+         $new_fields = [
+            [
+                'title'   => __('Địa chỉ chi tiết', 'supership'),
+                'id'      => 'store_address',
+                'type'    => 'text',
                 'default' => '',
-                'desc'  => 'Nhập địa chỉ chi tiết của cửa hàng.',
+                'desc'    => __('Nhập địa chỉ chi tiết của cửa hàng.', 'supership'),
             ],
             [
-                'title' => 'Phường / Xã',
-                'id'    => 'store_commune',
-                'type'  => 'text',
+                'title'   => __('Phường / Xã', 'supership'),
+                'id'      => 'store_commune',
+                'type'    => 'text',
                 'default' => '',
-                'desc'  => 'Nhập phường / xã của cửa hàng.',
+                'desc'    => __('Nhập phường / xã của cửa hàng.', 'supership'),
             ],
             [
-                'title' => 'Quận / Huyện',
-                'id'    => 'store_district',
-                'type'  => 'text',
+                'title'   => __('Quận / Huyện', 'supership'),
+                'id'      => 'store_district',
+                'type'    => 'text',
                 'default' => '',
-                'desc'  => 'Nhập quận / huyện của cửa hàng.',
+                'desc'    => __('Nhập quận / huyện của cửa hàng.', 'supership'),
             ],
-           
+            [
+                'title'   => __('Tỉnh / Thành phố', 'supership'),
+                'id'      => 'store_province',
+                'type'    => 'text',
+                'default' => '',
+                'desc'    => __('Nhập tỉnh / thành phố của cửa hàng.', 'supership'),
+            ],
         ];
 
         // Xác định vị trí của "Address line 2"
@@ -55,7 +61,28 @@ class Store_Address_Extended {
             'address' => get_option('store_address'),
             'commune'   => get_option('store_commune'),
             'district'  => get_option('store_district'),
-            'province'  => get_option('woocommerce_store_city'),
+            'province'  => get_option('store_province'),
         ];
+    }
+    public static function set_full_store_address($data = [])
+    {
+        if (!is_array($data)) {
+            return false;
+        }
+        $map = [
+            'address'  => 'store_address',
+            'commune'  => 'store_commune',
+            'district' => 'store_district',
+            'province' => 'store_province',
+        ];
+        foreach ($map as $key => $option_name) {
+            if (isset($data[$key])) {
+                update_option(
+                    $option_name,
+                    sanitize_text_field($data[$key])
+                );
+            }
+        }
+        return true;
     }
 }

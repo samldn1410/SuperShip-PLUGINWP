@@ -154,4 +154,42 @@ class Order_Service {
         return null;
     }
     
+   public static function get_shipping_price($sender_province, $sender_district, $receiver_province, $receiver_district, $weight, $value = 0)
+    {
+        if (!$sender_province || !$sender_district || !$receiver_province || !$receiver_district) {
+            return [
+                'status' => 'Error',
+                'message' => 'Thiếu thông tin địa chỉ để tính phí.'
+            ];
+        }
+
+        $params = [
+            'sender_province'   => $sender_province,
+            'sender_district'   => $sender_district,
+            'receiver_province' => $receiver_province,
+            'receiver_district' => $receiver_district,
+            'weight'            => intval($weight),
+            'value'             => intval($value),
+        ];
+        $res = API::get('/v1/partner/orders/price', $params);
+        if (!isset($res['status']) || $res['status'] !== 'Success') {
+            return $res;
+        }
+        $first = $res['results'][0] ?? null;
+        if (!$first) {
+          return [
+                'status' => 'Error',
+                'message' => 'API không trả về dữ liệu hợp lệ.'
+            ];
+         }
+        return [
+            'status'     => 'Success',
+             'service'    => $first['service'] ?? '',
+            'fee'        => intval($first['fee'] ?? 0),
+            'insurance'  => intval($first['insurance'] ?? 0),
+            'pickup'     => $first['pickup']['name'] ?? '',
+            'delivery'   => $first['delivery']['name'] ?? '',
+            'raw'        => $first
+            ];
+        }
 }

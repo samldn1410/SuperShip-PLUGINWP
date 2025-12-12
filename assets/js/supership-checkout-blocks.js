@@ -1,119 +1,91 @@
-document.addEventListener('wc-blocks-loaded', () => {
+jQuery(function ($) {
+    console.log("Supership Checkout JS Loaded");
 
-    const checkoutAPI = window.wc?.blocksCheckout;
-    if (!checkoutAPI) {
-        console.warn("SuperShip: Blocks Checkout API not available");
-        return;
+    function log() {
+        console.log.apply(console, arguments);
     }
 
-    console.log("SuperShip: Blocks API Loaded");
+    /**
+     * ======== 1) KHI CHỌN TỈNH ========
+     */
+    $(document).on("change", "select#shipping-supership-province", function () {
 
-    // 1️⃣ Đổi nút Place Order khi chọn SuperShip
-    checkoutAPI.registerCheckoutFilters('supership-extension', {
-        placeOrderButtonLabel: (defaultValue, extensions) => {
-            const shipping = extensions?.cart?.shippingRates?.[0]?.method_id;
+        let province_code = $(this).val();
+        log("Province selected:", province_code);
 
-            if (shipping === 'supership') {
-                return "Đặt đơn SuperShip";
+        // Reset huyện + xã
+        const districtSelect = $("select#shipping-supership-district");
+        const communeSelect  = $("select#shipping-supership-commune");
+
+        districtSelect.html('<option value="">Đang tải...</option>');
+        communeSelect.html('<option value="">Chọn phường/xã</option>');
+
+        // Gửi AJAX request
+        $.post(
+            ajax_object.ajax_url,
+            {
+                action: "load_districts",
+                province_code: province_code
             }
-            return defaultValue;
-        }
-    });
+        )
+        .done(function (res) {
 
+            log("📥 District response:", res);
 
-    // 2️⃣ Hook trước khi WooCommerce tạo đơn
-    document.addEventListener('wc-blocks-checkout-before-processing', async (event) => {
-
-        const checkout = event.detail;
-        const cart = checkout.cart;
-
-        const shipping = cart.shippingRates?.[0]?.method_id;
-
-        if (shipping !== 'supership') return;
-
-        console.log("SuperShip: Preparing API payload...");
-
-        const payload = {
-            order_id: checkout.orderId,
-            shipping_method: shipping,
-            receiver: {
-                name: checkout.shippingAddress.first_name + " " + checkout.shippingAddress.last_name,
-                phone: checkout.shippingAddress.phone,
-                address: checkout.shippingAddress?.['supership/address_detail']||"",
-                province_code: checkout.shippingAddress?.['supership/province'] || "",
-                district_code: checkout.extensions?.['supership/district'] || "",
-                commune_code: checkout.extensions?.['supership/commune'] || "",
-            },
-            amount: cart.totals.total_price,
-            value: cart.totals.total_price,
-            weight: cart.itemsWeight,
-        };
-
-        try {
-            const res = await wp.apiFetch({
-                path: '/wp-json/supership/v1/create-order-from-checkout',
-                method: 'POST',
-                data: payload
-            });
-
-            if (!res.success) {
-                throw new Error(res.message);
+            // Nếu API lỗi thì không được để field trống -> avoid "Invalid district"
+            if (!res || !res.districts) {
+                districtSelect.html('<option value="">Không có dữ liệu</option>');
+                return;
             }
 
-            console.log("SuperShip Created:", res);
+            let html = '<option value="">Chọn quận/huyện</option>';
+            res.districts.forEach(function (d) {
+                html += `<option value="${d.code}">${d.name}</option>`;
+            });
 
-        } catch (err) {
-            event.preventDefault();
-            alert("Không thể tạo đơn SuperShip: " + err.message);
-        }
+            districtSelect.html(html);
+        })
+        .fail(function (err) {
+            console.error("AJAX district error:", err);
+        });
     });
 
-});
-document.addEventListener('wc-blocks-loaded', () => {
+    /**
+     * ======== 2) KHI CHỌN HUYỆN ========
+     */
+    $(document).on("change", "select#shipping-supership-district", function () {
 
-    if (!window.wc || !window.wc.blocksCheckout) {
-        console.warn("WC Blocks not loaded");
-        return;
-    }
-    
+        let district_code = $(this).val();
+        log("District selected:", district_code);
 
-    const { checkoutFilters } = window.wc.blocksCheckout;
+        const communeSelect  = $("select#shipping-supership-commune");
+        communeSelect.html('<option value="">Đang tải...</option>');
 
-    // Province → Load districts
-    checkoutFilters.addFilter(
-        'supership/province',
-        'supership-update-district',
-        async (value, fields) => {
+        $.post(
+            ajax_object.ajax_url,
+            {
+                action: "load_communes",
+                district_code: district_code
+            }
+        )
+        .done(function (res) {
 
-            if (!value) return fields;
-            console.log("Province changed:", value);
-            const response = await wp.apiFetch({
-                path: `/wp-json/supership/v1/districts?province_code=${value}`
+            log("📥 Commune response:", res);
+
+            if (!res || !res.communes) {
+                communeSelect.html('<option value="">Không có dữ liệu</option>');
+                return;
+            }
+
+            let html = '<option value="">Chọn phường/xã</option>';
+            res.communes.forEach(function (c) {
+                html += `<option value="${c.code}">${c.name}</option>`;
             });
 
-            fields['supership/district'].options = response.options;
-            fields['supership/commune'].options = [];
-            console.log("Fields object:", fields);
-            return fields;
-        }
-    );
-
-    // District → Load communes
-    checkoutFilters.addFilter(
-        'supership/district',
-        'supership-update-commune',
-        async (value, fields) => {
-            console.log("District changed:", value);
-            if (!value) return fields;
-
-            const response = await wp.apiFetch({
-                path: `/wp-json/supership/v1/communes?district_code=${value}`
-            });
-
-            fields['supership/commune'].options = response.options;
-            console.log("Fields object:", fields);
-            return fields;
-        }
-    );
-
+            communeSelect.html(html);
+        })
+        .fail(function (err) {
+            console.error("AJAX commune error:", err);
+        });
+    });
 });
