@@ -34,8 +34,14 @@ jQuery(document).ready(function($){
         };
 
         $.post(wh_ajax.ajaxurl, data, function(res){
-            alert(res.message);
-            if (res.success) location.reload();
+             Swal.fire({
+                icon: res.success ? 'success' : 'error',
+                title: res.success ? 'Success' : 'Error',
+                text: res.message
+            }).then(() => {
+                delete_transient('supership_warehouses_list'); 
+                if (res.success) location.reload();
+            });
         });
     });
 
@@ -79,8 +85,14 @@ jQuery(document).ready(function($){
         };
 
         $.post(wh_ajax.ajaxurl, data, function(res){
-            alert(res.message);
-            if (res.success) location.reload();
+           Swal.fire({
+                icon: res.success ? 'success' : 'error',
+                title: res.success ? 'Updated' : 'Error',
+                text: res.message
+            }).then(() => {
+                delete_transient('supership_warehouses_list'); 
+                if (res.success) location.reload();
+            });
         });
     });
 

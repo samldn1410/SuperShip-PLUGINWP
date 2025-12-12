@@ -1,29 +1,33 @@
 <div id="wh-modal-create" class="wh-modal hidden">
     <div class="wh-modal-content">
-        <h2>Tạo kho hàng</h2>
+        <h2><i class="bi bi-plus-circle"></i> Create Warehouse</h2>
 
         <table class="form-table">
-            <tr><th>Tên kho</th><td><input type="text" id="wh_name"></td></tr>
-            <tr><th>SĐT</th><td><input type="text" id="wh_phone"></td></tr>
-            <tr><th>Liên hệ</th><td><input type="text" id="wh_contact"></td></tr>
-            <tr><th>Địa chỉ</th><td><input type="text" id="wh_address"></td></tr>
+            <tr><th>Warehouse Name</th><td><input type="text" id="wh_name" class="regular-text"></td></tr>
+            <tr><th>Phone</th><td><input type="text" id="wh_phone" class="regular-text"></td></tr>
+            <tr><th>Contact</th><td><input type="text" id="wh_contact" class="regular-text"></td></tr>
+            <tr><th>Address</th><td><input type="text" id="wh_address" class="regular-text"></td></tr>
 
-            <tr><th>Tỉnh</th><td><select id="wh_province"></select></td></tr>
-            <tr><th>Quận/Huyện</th><td><select id="wh_district"></select></td></tr>
-            <tr><th>Phường/Xã</th><td><select id="wh_commune"></select></td></tr>
+            <tr><th>Province</th><td><select id="wh_province" class="regular-text"></select></td></tr>
+            <tr><th>District</th><td><select id="wh_district" class="regular-text"></select></td></tr>
+            <tr><th>Commune</th><td><select id="wh_commune" class="regular-text"></select></td></tr>
 
             <tr>
-                <th>Mặc định</th>
+                <th>Primary</th>
                 <td>
-                    <select id="wh_primary">
-                        <option value="1">Kho mặc định</option>
-                        <option value="2" selected>Kho thường</option>
+                    <select id="wh_primary" class="regular-text">
+                        <option value="1">Default</option>
+                        <option value="2" selected>Normal</option>
                     </select>
                 </td>
             </tr>
         </table>
 
-        <button class="button button-primary" id="wh-btn-create">Tạo kho</button>
-        <button class="button" id="wh-close-create">Đóng</button>
+        <div style="text-align:right; margin-top:20px;">
+            <button class="button" id="wh-close-create">Cancel</button>
+            <button class="button button-primary" id="wh-btn-create">
+                <i class=""></i> Create
+            </button>
+        </div>
     </div>
 </div>
