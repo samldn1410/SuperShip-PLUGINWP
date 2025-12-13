@@ -1,10 +1,6 @@
 jQuery(document).ready(function($){
 
-    /* ===================================================================
-        OPEN / CLOSE MODALS
-    =================================================================== */
 
-    // ---- OPEN CREATE MODAL ----
   $('#wh-open-create-modal').on('click', function(e){
         e.preventDefault();
         $('#wh-modal-create').removeClass('hidden');
@@ -14,7 +10,7 @@ jQuery(document).ready(function($){
         $('#wh_commune').html('<option value="">-- Chọn phường/xã --</option>');
     });
 
-    // ---- CLOSE CREATE MODAL ----
+   
     $('#wh-close-create').on('click', function(){
         $('#wh-modal-create').addClass('hidden');
         $('body').css('overflow', 'auto');
@@ -45,12 +41,6 @@ jQuery(document).ready(function($){
     });
 
 
-
-    /* ===================================================================
-        EDIT WAREHOUSE
-    =================================================================== */
-
-    // ---- OPEN EDIT MODAL ----
     $(document).on('click', '.wh-edit-btn', function(e){
         e.preventDefault();
 
@@ -65,7 +55,6 @@ jQuery(document).ready(function($){
         $('body').css('overflow', 'hidden');
     });
 
-    // ---- CLOSE EDIT MODAL ----
     $('#wh-close-edit').on('click', function(){
         $('#wh-modal-edit').addClass('hidden');
         $('body').css('overflow', 'auto');
@@ -94,14 +83,6 @@ jQuery(document).ready(function($){
         });
     });
 
-
-
-
-    /* ===================================================================
-        LOCATION LOADING (Province → District → Commune)
-    =================================================================== */
-
-    /** Load provinces on modal open ONLY */
     function loadProvinces() {
         $.post(wh_ajax.ajaxurl, { action: 'load_provinces' }, function(res){
             let $p = $('#wh_province');
@@ -111,11 +92,6 @@ jQuery(document).ready(function($){
             });
         });
     }
-
-   
-
-
-    /** Load districts */
     $('#wh_province').on('change', function(){
 
         let province = $(this).val();

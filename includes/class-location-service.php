@@ -87,7 +87,7 @@ class Location_Service {
         }
         return '';
     }
-
+  
     // Load address json
     private static $local = null;
     private static function load_local_data() {
