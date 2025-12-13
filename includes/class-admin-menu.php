@@ -4,80 +4,152 @@ if (!defined('ABSPATH')) exit;
 class Admin_Menu {
 
     public static function init() {
-        add_action('admin_menu', [__CLASS__, 'register'], 99);
+
+        add_filter(
+            'woocommerce_settings_tabs_array',[__CLASS__, 'add_tab'],
+            50
+        );
+        add_filter(
+            'woocommerce_get_sections_supership',[__CLASS__, 'add_sections']
+        );
+        add_action(
+            'woocommerce_settings_supership',[__CLASS__, 'render']
+        );
+         add_action('admin_enqueue_scripts', [__CLASS__, 'hide_save_button']);
     }
 
-    public static function register() {
+    /** ================= TAB ================= */
 
+    public static function add_tab($tabs) {
+        $tabs['supership'] = __('SuperShip', 'supership');
+        return $tabs;
+    }
 
-        if (!class_exists('WooCommerce')) {
-            return;
+    /** ================= SECTIONS ================= */
+
+    public static function add_sections($sections) {
+        return [
+            'info'         => __('Thông tin', 'supership'),
+            'api_token'    => __('API Token', 'supership'),
+            'webhook'      => __('Webhook', 'supership'),
+            'webhook_logs' => __('Webhook Logs', 'supership'),
+            'warehouses'   => __('Kho hàng', 'supership'),
+            'create_order' => __('Tạo đơn', 'supership'),
+        ];
+    }
+
+    /** ================= RENDER ================= */
+
+    public static function render() {
+        global $current_section;
+
+        // Nav giống Shipping
+        self::render_sections_nav();
+        echo '<br class="clear" />';
+
+        switch ($current_section ?: 'info') {
+
+            case 'api_token':
+                include DIR . 'views/settings.php'; 
+                break;
+
+            case 'webhook':
+                include DIR . 'views/webhook-settings.php';
+                break;
+
+            case 'webhook_logs':
+                include DIR . 'views/webhook-logs.php';
+                break;
+
+            case 'warehouses':
+                include DIR . 'views/warehouse.php';
+                break;
+
+            case 'create_order':
+                include DIR . 'views/create-order.php';
+                break;
+
+            default:
+                self::output_info();
+                break;
+        }
+    }
+    private static function render_sections_nav() {
+        global $current_section;
+
+        $sections = self::add_sections([]);
+        echo '<ul class="subsubsub">';
+
+        $last = array_key_last($sections);
+
+        foreach ($sections as $id => $label) {
+            $url = admin_url('admin.php?page=wc-settings&tab=supership&section=' . $id);
+            $class = ($current_section === $id || (!$current_section && $id === 'info')) ? 'current' : '';
+
+            echo '<li><a href="' . esc_url($url) . '" class="' . esc_attr($class) . '">' . esc_html($label) . '</a>';
+            if ($id !== $last) echo ' | ';
+            echo '</li>';
         }
 
-        add_submenu_page(
-            'woocommerce',
-            __('API Token', 'supership'),            
-            __('API Token', 'supership'),         
-            'manage_woocommerce',
-            'supership-api-token',
-            [__CLASS__, 'api_token_page']
-        );
-
-        add_submenu_page(
-            'woocommerce',
-            __('Cấu hình Webhook', 'supership'),
-            __('Webhook', 'supership'),
-            'manage_woocommerce',
-            'supership-webhook',
-            [__CLASS__, 'webhook_page']
-        );
-
-        add_submenu_page(
-            'woocommerce',
-            __('Nhật ký Webhook', 'supership'),
-            __('Webhook Logs', 'supership'),
-            'manage_woocommerce',
-            'supership-webhook-logs',
-            [__CLASS__, 'webhook_logs_page']
-        );
-
-        add_submenu_page(
-            'woocommerce',
-            __('Tạo đơn SuperShip', 'supership'),
-            __('Tạo đơn SuperShip', 'supership'),
-            'manage_woocommerce',
-            'supership-create-order',
-            [__CLASS__, 'create_order_page']
-        );
-
-        add_submenu_page(
-            'woocommerce',
-            __('Kho hàng', 'supership'),
-            __('Kho hàng', 'supership'),
-            'manage_woocommerce',
-            'supership-warehouses',
-            [__CLASS__, 'warehouses_page']
-        );
+        echo '</ul>';
+    }
+    public static function hide_save_button($hook) {
+    if ($hook !== 'woocommerce_page_wc-settings') {
+        return;
     }
 
-    public static function api_token_page() {
-        include DIR . 'views/settings.php';
+    if (!isset($_GET['tab']) || $_GET['tab'] !== 'supership') {
+        return;
+    }
+        $current_section = isset($_GET['section']) ? $_GET['section'] : 'info';
+        $sections_without_save = ['info', 'webhook_logs', 'warehouses', 'create_order','api_token','webhook'];
+        if (in_array($current_section, $sections_without_save)) {
+            ?>
+            <style type="text/css">
+                .woocommerce-save-button,
+                p.submit,
+                input[type="submit"].button-primary {
+                    display: none !important;
+                }
+            </style>
+            <?php
+        }
     }
 
-    public static function webhook_page() {
-        include DIR . 'views/webhook-settings.php';
-    }
+    private static function output_info() {
+        ?>
+        <h2><?php esc_html_e('SuperShip – Kết nối vận chuyển thông minh', 'supership'); ?></h2>
 
-    public static function webhook_logs_page() {
-        include DIR . 'views/webhook-logs.php';
-    }
+        <p>
+            <?php esc_html_e(
+                'SuperShip giúp kết nối WooCommerce với hệ thống vận chuyển SuperShip, '
+                . 'tự động tạo đơn, tính phí và theo dõi trạng thái.',
+                'supership'
+            ); ?>
+        </p>
 
-    public static function create_order_page() {
-        include DIR . 'views/create-order.php';
-    }
-
-    public static function warehouses_page() {
-        include DIR . 'views/warehouse.php';
+        <table class="widefat striped" style="max-width:800px">
+            <tbody>
+                <tr>
+                    <th><?php esc_html_e('API Token', 'supership'); ?></th>
+                    <td>
+                        <?php echo Settings::get_token()
+                            ? '<span style="color:green">✔ Đã cấu hình</span>'
+                            : '<span style="color:red">✘ Chưa cấu hình</span>'; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Kho hàng', 'supership'); ?></th>
+                    <td>
+                        <?php echo get_option('supership_shop_warehouse_created')
+                            ? '<span style="color:green">✔ Đã tạo</span>'
+                            : '<span style="color:red">✘ Chưa tạo</span>'; ?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <?php
     }
 }
+
 Admin_Menu::init();

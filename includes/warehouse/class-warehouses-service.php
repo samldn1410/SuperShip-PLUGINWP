@@ -3,24 +3,14 @@ if (!defined('ABSPATH')) exit;
 
 class Warehouses_Service {
 
-    const CACHE_KEY = 'warehouses_cache';
-
-    // ... (Các hàm static get_all, get_default, find không đổi)
-
-    public static function get_all() {
-        $cached = get_transient(self::CACHE_KEY);
-        if ($cached) return $cached;
-
+     public static function get_all() {
         $res = API::get('/v1/partner/warehouses');
-
-        if ($res && $res['status'] === 'Success') {
-            $list = $res['results'];
-            set_transient(self::CACHE_KEY, $list, 24 * HOUR_IN_SECONDS);
-            return $list;
+        if ($res && isset($res['status']) && $res['status'] === 'Success') {
+            return $res['results'] ?? [];
         }
-
         return [];
     }
+
 
     public static function get_default() {
         $warehouses = self::get_all();

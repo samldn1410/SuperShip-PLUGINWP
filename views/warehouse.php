@@ -19,9 +19,9 @@ $paged_list = array_slice($list, $offset, $per_page);
 ?>
 
 <div class="wrap">
-    <h1 style="margin-bottom:15px;">
+    <h2 style="margin-bottom:15px;">
         <?php echo esc_html__('Danh sách kho hàng', 'supership'); ?>
-    </h1>
+    </h2>
 
     <button
         id="wh-open-create-modal"

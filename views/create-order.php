@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) exit;
 ?>
 <div class="wrap create-order" style="max-width: 800px; margin-top: 20px;">
-    <h1><?php _e('Tạo Đơn SuperShip', 'supership'); ?></h1>
+    <h2><?php _e('Tạo Đơn SuperShip', 'supership'); ?></h2>
 
     <form method="post" id="order_form">
         <?php wp_nonce_field('create_order', 'nonce'); ?>
