@@ -77,6 +77,31 @@ add_action('plugins_loaded', function () {
         dirname(plugin_basename(__FILE__)) . '/languages'
     );
 });
+add_action('woocommerce_settings_save_general', function() {
+    Store_Address_Extended::save_fields();
+    Settings::maybe_create_warehouse_after_address_save();
+}, 10);
+add_action('admin_footer', function () {
+
+    $msg = get_transient('supership_flash_message');
+    if (!$msg) return;
+
+    delete_transient('supership_flash_message');
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Swal.fire({
+            icon: '<?php echo esc_js($msg['type']); ?>',
+            title: '<?php echo esc_js($msg['title']); ?>',
+            text: '<?php echo esc_js($msg['text']); ?>',
+            confirmButtonText: '<?php echo esc_js(__('OK', 'supership')); ?>',
+            allowOutsideClick: true,
+            allowEscapeKey: true
+        });
+    });
+    </script>
+    <?php
+});
 add_action('admin_enqueue_scripts', function() {
     wp_enqueue_style('supership-admin', URL . 'assets/css/admin.css');
     wp_enqueue_script('supership-warehouse', URL . 'assets/js/warehouse.js', ['jquery'], false, true);

@@ -5,7 +5,12 @@ $msg = null;
 
 // Handle submit
 if (isset($_POST['save_token']) && wp_verify_nonce($_POST['_wpnonce'], 'save_token')) {
-    Settings::save_token($_POST['token']);
+    $result = Settings::save_token($_POST['token']);
+    if ($result === 'need_address') {
+        wp_safe_redirect(admin_url('admin.php?page=wc-settings&tab=general'));
+        exit;
+    }
+
     $msg = [
         'type' => 'success',
         'text' => __('Đã lưu API Token thành công!', 'supership')
