@@ -7,7 +7,7 @@ class SuperShip_Shipping_MetaBox {
 
     public static function init() {
         add_action('add_meta_boxes', [__CLASS__, 'register_metabox']);
-        add_action('add_meta_boxes', [__CLASS__, 'register_shipping_fee_boxes'], 10, 2);
+        // add_action('add_meta_boxes', [__CLASS__, 'register_shipping_fee_boxes'], 10, 2);
         add_action('add_meta_boxes', [__CLASS__, 'remove_default_boxes'], 20);
         add_action('woocommerce_process_shop_order_meta', [__CLASS__, 'save_number_id'], 20);
         add_action('add_meta_boxes', function() {
@@ -160,7 +160,6 @@ class SuperShip_Shipping_MetaBox {
             echo "</div>";
             return;
         }
-
         $tracking = $data['supership_code'];
         $trackingUrl = "https://tracking.supership.vn/?code={$tracking}";
         $js_trackingUrl = esc_url($trackingUrl);
@@ -188,51 +187,51 @@ class SuperShip_Shipping_MetaBox {
             <span class='{$badge_class}'>" . esc_html($data['status_name']) . "</span>
         </div>";
 
-        echo "
-        <button 
-            type='button' 
-            class='track-btn'
-            onclick=\"window.open('{$js_trackingUrl}', '_blank');\"
-        >
-            " . esc_html__('Theo dõi đơn hàng', 'supership') . "
-        </button>
-        ";
-
-        echo "</div>";
-
-        if ($is_canceled) {
-            return;
-        }
-
         echo "<div class='divider-line'></div>";
         echo "<div class='action-buttons'>";
 
+        /* Theo dõi đơn */
         echo "
         <button 
             type='button'
-            class='bi bi-arrow-clockwise action-btn update-order-info'
-            data-order-id='{$order_id}'
+            class='action-btn track-btn'
+            title='" . esc_attr__('Theo dõi đơn hàng', 'supership') . "'
+            onclick=\"window.open('{$js_trackingUrl}', '_blank');\"
         >
-            " . esc_html__('Làm mới', 'supership') . "
+            <i class='bi bi-truck'></i>
         </button>
         ";
 
-        // Trạng thái cho phép hủy
+        /* Làm mới */
+        echo "
+        <button 
+            type='button'
+            class='action-btn update-order-info'
+            title='" . esc_attr__('Làm mới', 'supership') . "'
+            data-order-id='{$order_id}'
+        >
+            <i class='bi bi-arrow-clockwise'></i>
+        </button>
+        ";
+
+        /* Hủy đơn */
         $allow_cancel_states = ['chờ lấy hàng'];
 
         if (in_array($status, $allow_cancel_states)) {
             echo "
             <button 
                 type='button'
-                class='bi bi-x-circle action-btn cancel-order'
+                class='action-btn cancel-order'
+                title='" . esc_attr__('Hủy đơn', 'supership') . "'
                 data-order-id='{$order_id}'
                 data-code='{$tracking}'
             >
-                " . esc_html__('Hủy đơn', 'supership') . "
+                <i class='bi bi-x-lg'></i>
             </button>
             ";
         }
 
+        echo "</div>";
         echo "</div>";
     }
 
@@ -259,9 +258,9 @@ class SuperShip_Shipping_MetaBox {
             '2' => __('Người nhận', 'supership'),
         ];
         $config_map = [
-            '1' => __('Cho xem hàng (Không thử)', 'supership'),
-            '2' => __('Cho thử hàng', 'supership'),
-            '3' => __('Không cho xem hàng', 'supership'),
+            '1' => __(' Cho Xem Hàng Nhưng Không Cho Thử Hàng', 'supership'),
+            '2' => __('Cho Thử Hàng', 'supership'),
+            '3' => __('Không Cho Xem Hàng', 'supership'),
         ];
         $service_map = [
             '1' => __('Tốc hành', 'supership'),

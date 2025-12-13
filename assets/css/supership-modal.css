@@ -12,19 +12,23 @@
     background-color: rgba(0,0,0,0.7); /* Nền mờ */
 }
 .create-order-btn {
-            border-radius: 6px !important;
-            font-size: 14px !important;
-            background: #2271b1 !important;
-            transition: 0.2s ease;
-            margin-left: 5px !important;
-            vertical-align: middle;
-            display: inline-block !important;
-        }
-        .create-order-btn:hover {
-            background: #135e96 !important;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-        }
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background: #f45b69 !important;   
+    color: #fff !important;
+    transition: 0.2s ease;
+    margin-left: 5px !important;
+    vertical-align: middle;
+    display: inline-block !important;
+}
+#modal-body {
+    position: relative; /* 👈 QUAN TRỌNG */
+}
+.create-order-btn:hover {
+    background: #e64957 !important; 
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
 
 .modal-content {
     background-color: #fefefe;
@@ -59,33 +63,119 @@
     text-align: right;
 }
 
-/* Form Styles */
-.config-form h4 {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-    margin-top: 20px;
-    color: #0073aa;
-    font-size: 16px;
+.config-form .row {
+    display: grid;
+    grid-template-columns: minmax(140px, 22%) 1fr;
+    column-gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: start;
+    margin-bottom: 12px;
 }
-.row {
-    margin-bottom: 10px;
-    clear: both;
+
+
+/* Label */
+.config-form .row > label:first-child {
+    font-weight: 600;
+    color: #333;
+   
+}
+
+.config-form .row > select,
+.config-form .row > input {
+    width: 100%;
+}
+.config-form .row textarea,
+.config-form .row .shipping-preview {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+.row-2col {
+    grid-template-columns: 1fr 1fr !important;
+}
+
+.row-2col label {
+    font-weight: normal;
+}
+.row input[type="checkbox"] {
+    width: auto;
+}
+
+.row label input[type="checkbox"] {
+    margin-right: 6px;
+}
+textarea#delivery_note {
+    width: 100%;
+}
+.shipping-info {
+    background: #f5f7fa;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 6px;
+    color: #0073aa;
+}
+
+/* Cho fee + insurance nằm ngang */
+#shipping_preview {
     display: flex;
     align-items: center;
+    gap: 16px; /* khoảng cách 2 bên */
+    flex-wrap: wrap; /* phòng khi màn nhỏ */
 }
-.row label {
-    font-weight: bold;
-    display: inline-block;
-    width: 35%; /* Tăng độ rộng label */
-    padding-right: 10px;
+
+/* 2 cái i chang nhau */
+#shipping_preview .fee,
+#shipping_preview .sub {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0073aa;
+    white-space: nowrap;
 }
-.row input[type="text"],
-.row select {
-    width: 65%; /* Giảm độ rộng input */
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
+.barter-note {
+    background: #f8f9fa;
+    border-left: 4px solid #f45b69;
+    padding: 12px 14px;
+    margin: 10px 0 14px;
     border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.barter-note strong {
+    color: #d63638;
+}
+/* Contact info box */
+.contact-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+    background: #f5f7fa;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Mỗi item */
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Label */
+.contact-item .label {
+    color: #555;
+    font-weight: 600;
+}
+
+/* Value */
+.contact-item .value {
+    color: #0073aa;
+    font-weight: 600;
 }
 
 /* Loading Overlay */
@@ -141,4 +231,57 @@
 }
 .swal2-container {
     z-index: 200000 !important;
+}
+#barter_extra {
+    display: none;
+}
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-top: 12px;
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+}
+/* Nút Đóng ở footer (không đụng close X trên header) */
+.close-btn-footer {
+    background: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.close-btn-footer:hover {
+    background: #e5e5e5;
+}
+
+/* Nút Tạo đơn giữ nguyên style create-order */
+.modal-footer .create-order-btn {
+    margin-left: auto;
+}
+
+
+
+.close-btn-footer {
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    background: #6c757d !important;
+    color: #fff !important;
+
+    border: none !important;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.close-btn-footer:hover {
+    background: #5a6268 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* bỏ viền xanh WP */
+.close-btn-footer:focus,
+.close-btn-footer:active {
+    outline: none !important;
+    box-shadow: none !important;
 }

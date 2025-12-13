@@ -14,6 +14,8 @@ class Admin_UI {
                 10
             );
         });
+        add_action('wp_ajax_preview_shipping_fee', [__CLASS__, 'ajax_preview_shipping_fee']);
+
         // Đăng ký AJAX handlers (cho người dùng đã đăng nhập)
         add_action('wp_ajax_load_config_modal', [__CLASS__, 'handle_ajax_load_config_modal']);
         add_action('wp_ajax_create_supership_order_ajax', [__CLASS__, 'handle_ajax_create_order']);
@@ -152,18 +154,18 @@ class Admin_UI {
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
 
-                <h3>Cấu Hình cho Đơn Hàng SuperShip#<?php echo $order_id; ?></h3>
+                <h3>Cấu Hình cho Đơn Hàng SuperShip</h3>
 
                 <div id="modal-body"></div>
 
-                <div class="modal-footer">
-                    <button id="modal-create-btn"
-                            class="button button-primary"
-                            data-order-id="<?php echo $order_id; ?>">
-                        ✅ Tạo Đơn SuperShip
-                    </button>
+               <div class="modal-footer">
+                    <button class="button close-btn-footer">Đóng</button>
 
-                    <button class="button close-btn">Đóng</button>
+                    <button id="modal-create-btn"
+                            class="button create-order-btn"
+                            data-order-id="<?php echo $order_id; ?>">
+                        Tạo Đơn
+                    </button>
                 </div>
             </div>
         </div>
@@ -185,10 +187,6 @@ class Admin_UI {
         $html_content = ob_get_clean();
         wp_send_json_success(['html' => $html_content]);
     }
-
-    /**
-     * AJAX: Xử lý tạo đơn hàng.
-     */
     public static function handle_ajax_create_order() {
         if (!check_ajax_referer(self::AJAX_NONCE, 'security', false) || !current_user_can('edit_shop_orders') || !isset($_POST['order_id']) || !isset($_POST['config_data'])) {
             wp_send_json_error(['message' => 'Lỗi bảo mật hoặc thiếu dữ liệu.']);
@@ -223,7 +221,7 @@ class Admin_UI {
         } else {
             $wc_order->add_order_note(sprintf('Tạo đơn SuperShip thất bại. Lỗi: %s', $result['message']));
             wp_send_json_error([
-                'message' => '❌ Tạo đơn thất bại!',
+                'message' => ' Tạo đơn thất bại!',
                 'error_detail' => esc_html($result['message']),
                 'raw_details' => $result['details']
             ]);
@@ -246,7 +244,7 @@ class Admin_UI {
         $data['warehouses'] = $warehouses;
         $data['default_pickup_code'] = $default_pickup_code;
         $data['is_order_created'] = !empty(WC_Custom_Fields::get_field($order_id, 'order_code'));
-        $data['disabled_attr'] = $data['is_order_created'] ? 'disabled' : '';
+        // $data['disabled_attr'] = $data['is_order_created'] ? 'disabled' : '';
         return $data;
     }
 
@@ -254,94 +252,176 @@ class Admin_UI {
      * Render HTML Form Modal (Chỉ giữ lại 5 trường cấu hình SuperShip)
      */
  private static function render_config_form($data, $order) {
-        extract($data); // Lấy biến từ mảng $data
-        ?>
-        <div class="config-form">
-            <div class="row">
-                <label><?php esc_html_e('Kho Hàng', 'supership'); ?>:</label>
-                <select name="select_pickup_code" <?php echo $disabled_attr; ?>>
-                    <option value="">
-                        <?php
-                        printf(
-                            esc_html__('-- Mặc định: %s --', 'supership'),
-                            esc_html($default_pickup_code ?: __('CHƯA CÓ', 'supership'))
-                        );
-                        ?>
-                    </option>
-                    <?php 
-                    foreach ($warehouses as $w):
-                        $is_selected = ($current_pickup_code === $w['code']) ? "selected" : "";
-                        $is_default_label = (isset($w['primary']) && $w['primary'] == "1")
-                            ? ' (' . esc_html__('Mặc định', 'supership') . ')'
-                            : '';
+    extract($data); // Lấy biến từ mảng $data
+    ?>
+    <div class="config-form">
+        <div class="row">
+            <label><?php esc_html_e('Kho Hàng', 'supership'); ?>:</label>
+            <select name="select_pickup_code" <?php echo $disabled_attr; ?>>
+                <option value="">
+                    <?php
+                    printf(
+                        esc_html($default_pickup_code ?: __('CHƯA CÓ', 'supership'))
+                    );
                     ?>
-                        <option value="<?php echo esc_attr($w['code']); ?>" <?php echo $is_selected; ?>>
-                            <?php echo esc_html($w['name']); ?>
-                            (<?php echo esc_html($w['code']); ?>)
-                            <?php echo $is_default_label; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="row">
-                <label><?php esc_html_e('Cho Xem / Thử Hàng', 'supership'); ?>:</label>
-                <select name="config" <?php echo $disabled_attr; ?>>
-                    <option value="1" <?php selected($config, 1); ?>>
-                        <?php esc_html_e('Cho xem hàng nhưng không cho thử hàng', 'supership'); ?>
+                </option>
+                <?php 
+                foreach ($warehouses as $w):
+                    $is_selected = ($current_pickup_code === $w['code']) ? "selected" : "";
+                    $is_default_label = (isset($w['primary']) && $w['primary'] == "1")
+                        ? ' (' . esc_html__('Mặc định', 'supership') . ')'
+                        : '';
+                ?>
+                    <option value="<?php echo esc_attr($w['code']); ?>" <?php echo $is_selected; ?>>
+                        <?php echo esc_html($w['name']); ?>
+                        – <?php echo esc_html($w['formatted_address']); ?>
+                        <?php echo $is_default_label; ?>
                     </option>
-                    <option value="2" <?php selected($config, 2); ?>>
-                        <?php esc_html_e('Cho thử hàng', 'supership'); ?>
-                    </option>
-                    <option value="3" <?php selected($config, 3); ?>>
-                        <?php esc_html_e('Không cho xem hàng', 'supership'); ?>
-                    </option>
-                </select>
-            </div>
-            
-            <div class="row">
-                <label><?php esc_html_e('Người Trả Phí', 'supership'); ?>:</label>
-                <select name="payer" <?php echo $disabled_attr; ?>>
-                    <option value="1" <?php selected($payer, 1); ?>>
-                        <?php esc_html_e('Người gửi', 'supership'); ?>
-                    </option>
-                    <option value="2" <?php selected($payer, 2); ?>>
-                        <?php esc_html_e('Người nhận', 'supership'); ?>
-                    </option>
-                </select>
-            </div>
-            
-            <div class="row">
-                <label><?php esc_html_e('Gói Dịch Vụ', 'supership'); ?>:</label>
-                <select name="service" <?php echo $disabled_attr; ?>>
-                    <option value="1" <?php selected($service, 1); ?>>
-                        <?php esc_html_e('Tốc hành', 'supership'); ?>
-                    </option>
-                </select>
-            </div>
-            
-            <div class="row">
-                <label><?php esc_html_e('Đổi / Lấy Hàng Về', 'supership'); ?>:</label>
-                <select name="barter" <?php echo $disabled_attr; ?>>
-                    <option value="" <?php selected($barter, ''); ?>>
-                        <?php esc_html_e('Không', 'supership'); ?>
-                    </option>
-                    <option value="1" <?php selected($barter, 1); ?>>
-                        <?php esc_html_e('Có', 'supership'); ?>
-                    </option>
-                </select>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="row">
+            <label><?php esc_html_e('Người liên hệ', 'supership'); ?>:</label>
+            <div class="static-field">
+                <strong>Nguyễn Văn A</strong>
+                <span class="sep">|</span>
+                <span class="phone">0335 585 567</span>
             </div>
         </div>
-    <?php
-}
+        <div class="row">
+            <label><?php esc_html_e('Xem / Thử Hàng', 'supership'); ?>:</label>
+            <select name="config" <?php echo $disabled_attr; ?>>
+                <option value="1" <?php selected($config, 1); ?>>
+                    <?php esc_html_e('Cho xem hàng nhưng không cho thử hàng', 'supership'); ?>
+                </option>
+                <option value="2" <?php selected($config, 2); ?>>
+                    <?php esc_html_e('Cho thử hàng', 'supership'); ?>
+                </option>
+                <option value="3" <?php selected($config, 3); ?>>
+                    <?php esc_html_e('Không cho xem hàng', 'supership'); ?>
+                </option>
+            </select>
+        </div>
+        
+        <div class="row">
+            <label><?php esc_html_e('Người Trả Phí', 'supership'); ?>:</label>
+            <select name="payer" <?php echo $disabled_attr; ?>>
+                <option value="1" <?php selected($payer, 1); ?>>
+                    <?php esc_html_e('Người gửi', 'supership'); ?>
+                </option>
+                <option value="2" <?php selected($payer, 2); ?>>
+                    <?php esc_html_e('Người nhận', 'supership'); ?>
+                </option>
+            </select>
+        </div>
+        
+        <div class="row">
+            <label><?php esc_html_e('Đổi / Lấy Hàng Về', 'supership'); ?>:</label>
+                <label style="font-weight: normal; cursor: pointer; ">
+                    <input type="checkbox"
+                        id="barter_checkbox"
+                        value="1"
+                        <?php checked($barter, 1); ?>
+                        <?php echo $disabled_attr; ?>>
+                    <?php esc_html_e('Có đổi / lấy hàng về', 'supership'); ?>
+                </label>
+            </div>
 
-  
+    <div id="barter_extra">
+
+    <!-- LƯU Ý – full width -->
+    <div class="barter-note">
+        <strong><?php esc_html_e('Lưu ý:', 'supership'); ?></strong>
+            <?php esc_html_e(
+                'Bạn đã chọn đổi / lấy hàng về, vui lòng ghi rõ nội dung đổi (ví dụ: “Đổi về 2 áo”) trong ô Ghi chú khi giao.',
+                'supership'
+            ); ?>
+        </div>
+
+        <!-- Ghi chú giao hàng – vẫn là row -->
+        <div class="row">
+            <label><?php esc_html_e('Ghi chú giao hàng', 'supership'); ?>:</label>
+            <textarea
+                name="delivery_note"
+                id="delivery_note"
+                rows="3"
+                placeholder="<?php esc_attr_e('Ví dụ: Đổi về 2 áo size M', 'supership'); ?>"
+                <?php echo $disabled_attr; ?>
+            ><?php echo esc_textarea($delivery_note ?? ''); ?></textarea>
+        </div>
+
+    </div>
+    <div class="shipping-info">
+        <div id="shipping_preview">
+            <?php esc_html_e('Vui lòng chọn kho để xem phí...', 'supership'); ?>
+        </div>
+    </div>
+    </div>
+<?php
+}
     private static function save_config_from_modal($order_id, $config_data) {
         WC_Custom_Fields::save_field($order_id, 'pickup_code', sanitize_text_field($config_data['select_pickup_code'] ?? ''));
         WC_Custom_Fields::save_field($order_id, 'config', intval($config_data['config'] ?? 1));
         WC_Custom_Fields::save_field($order_id, 'payer', intval($config_data['payer'] ?? 1));
         WC_Custom_Fields::save_field($order_id, 'service', intval($config_data['service'] ?? 1));
         WC_Custom_Fields::save_field($order_id, 'barter', sanitize_text_field($config_data['barter'] ?? ''));
+    }
+
+    public static function ajax_preview_shipping_fee() {
+        check_ajax_referer(self::AJAX_NONCE, 'security');
+        $order_id    = intval($_POST['order_id'] ?? 0);
+        $pickup_code = sanitize_text_field($_POST['pickup_code'] ?? '');
+        if (!$order_id || !$pickup_code) {
+            wp_send_json_error(['message' => 'Thiếu dữ liệu']);
+        }
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            wp_send_json_error(['message' => 'Order không tồn tại']);
+        }
+        $warehouses = Warehouses_Service::get_all();
+        $warehouse  = null;
+        foreach ($warehouses as $w) {
+            if ($w['code'] === $pickup_code) {
+                $warehouse = $w;
+                break;
+            }
+        }
+        if (!$warehouse || empty($warehouse['formatted_address'])) {
+            wp_send_json_error(['message' => 'Không tìm thấy địa chỉ kho']);
+        }
+        $address_parts = array_map('trim', explode(',', $warehouse['formatted_address']));
+        $from_province = end($address_parts);
+        $from_district = $address_parts[count($address_parts) - 2] ?? '';
+        if (!$from_province || !$from_district) {
+            wp_send_json_error(['message' => 'Không tách được địa chỉ kho']);
+        }
+        $to_province = 'Tỉnh Bình Định';
+        $to_district = 'Huyện Tuy Phước';
+        if (!class_exists('Order_Creation_Handler')) {
+            wp_send_json_error(['message' => 'Thiếu Order_Creation_Handler']);
+        }
+        $product_info = Order_Creation_Handler::calculate_product_weight($order);
+        $weight = intval($product_info['weight_gram'] ?? 0);
+        if ($weight <= 0) {
+            wp_send_json_error(['message' => 'Không tính được trọng lượng']);
+        }
+        $result = Order_Service::get_shipping_price(
+            $from_province,
+            $from_district,
+            $to_province,
+            $to_district,
+            $weight,
+            intval($order->get_total())
+        );
+        if ($result['status'] !== 'Success') {
+            wp_send_json_error(['message' => $result['message'] ?? 'Không tính được phí']);
+        }
+        wp_send_json_success([
+            'fee'       => number_format($result['fee']) . ' đ',
+            'insurance' => number_format($result['insurance']) . ' đ',
+            'pickup'    => $result['pickup'],
+            'delivery'  => $result['delivery'],
+        ]);
     }
 }
 Admin_UI::init();

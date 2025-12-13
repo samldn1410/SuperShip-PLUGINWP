@@ -1,7 +1,10 @@
 <?php
 if (!defined('ABSPATH')) exit;
+$warehouses = Warehouses_Service::get_all();
+$default    = Warehouses_Service::get_default();
 ?>
-<div class="wrap create-order" style="max-width: 800px; margin-top: 20px;">
+
+<div class=" create-order" style="max-width: 800px; margin-top: 20px;">
     <h2><?php _e('Tạo Đơn SuperShip', 'supership'); ?></h2>
 
     <form method="post" id="order_form">
@@ -10,53 +13,56 @@ if (!defined('ABSPATH')) exit;
 
         <!-- ================== 1. KHO LẤY HÀNG ================== -->
         <div class="section-box">
-            <h2 class="title"><?php _e('1. Kho Lấy Hàng', 'supership'); ?></h2>
+            <h2 class="title"><?php _e('1. Địa Chỉ Lấy Hàng', 'supership'); ?></h2>
 
             <table class="form-table">
                 <tr>
-                    <th><?php _e('Chọn kho', 'supership'); ?></th>
+                    <th><?php _e('Chọn địa chỉ kho', 'supership'); ?></th>
                     <td>
-                        <select id="pickup_code" name="pickup_code" style="width:100%;">
-                            <option value="">
-                                <?php _e('-- Không chọn, nhập thủ công --', 'supership'); ?>
-                            </option>
-                            <?php
-                            $warehouses = Warehouses_Service::get_all();
-                            $default = Warehouses_Service::get_default();
-                            foreach ($warehouses as $w):
-                                $sel = ($default && $default['code'] === $w['code']) ? 'selected' : '';
-                            ?>
-                                <option value="<?= esc_attr($w['code']); ?>" <?= $sel; ?>>
-                                    <?= esc_html($w['name']); ?> - <?= esc_html($w['formatted_address']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <p class="description">
-                            <?php _e('Nếu không chọn, hãy nhập thông tin kho thủ công bên dưới.', 'supership'); ?>
-                        </p>
+                        <input type="hidden"
+                            id="pickup_code"
+                            name="pickup_code"
+                            value="<?= esc_attr($default['code'] ?? '') ?>">
+
+                        <div id="pickup_display" class="pickup-display-box">
+                            <?= esc_html($default
+                                ? $default['name'].' - '.$default['formatted_address']
+                                : __('Chưa chọn kho', 'supership')) ?>
+                        </div>
+
+                        <button type="button"
+                                class="button"
+                                id="btn-change-pickup"
+                                style="margin-top:8px;">
+                            <?php _e('Thay đổi kho', 'supership'); ?>
+                        </button>
                     </td>
                 </tr>
             </table>
 
-            <div id="pickup_manual_fields" style="border-top:1px dashed #ddd;padding-top:15px;margin-top:15px;">
+            <div id="pickup_manual_fields" style="border-top:1px dashed #ddd;">
                 <table class="form-table">
                     <tr>
-                        <th><span style="color:red">*</span> <?php _e('Tên kho (người gửi)', 'supership'); ?></th>
+                        <th><span style="color:red">*</span> <?php _e('Tên Kho Hàng', 'supership'); ?></th>
                         <td><input type="text" id="pickup_name" name="pickup_name" style="width:100%;"></td>
                     </tr>
                     <tr>
-                        <th><span style="color:red">*</span> <?php _e('SĐT kho', 'supership'); ?></th>
+                        <th><span style="color:red">*</span> <?php _e('Tên người liên hệ', 'supership'); ?></th>
+                        <td><input type="text" id="pickup_contact" name="pickup_contact" style="width:100%;"></td>
+                    </tr>
+                    <tr>
+                        <th><span style="color:red">*</span> <?php _e('SĐT của Điểm Lấy Hàng', 'supership'); ?></th>
                         <td><input type="tel" id="pickup_phone" name="pickup_phone" style="width:100%;"></td>
                     </tr>
                     <tr>
-                        <th><span style="color:red">*</span> <?php _e('Địa chỉ kho', 'supership'); ?></th>
+                        <th><span style="color:red">*</span> <?php _e('Địa chỉ Điểm Lấy Hàng', 'supership'); ?></th>
                         <td><input type="text" id="pickup_address" name="pickup_address" style="width:100%;"></td>
                     </tr>
                     <tr>
                         <th><span style="color:red">*</span> <?php _e('Tỉnh / Thành phố', 'supership'); ?></th>
                         <td>
                             <select id="pickup_province" name="pickup_province" style="width:100%;">
-                                <option value=""><?php _e('-- Chọn tỉnh --', 'supership'); ?></option>
+                                <option value=""><?php _e('-- Chọn Tỉnh/Thành Phố --', 'supership'); ?></option>
                                 <?php foreach (Location_Service::get_provinces() as $p): ?>
                                     <option value="<?= esc_attr($p['code']); ?>">
                                         <?= esc_html($p['name']); ?>
@@ -69,7 +75,7 @@ if (!defined('ABSPATH')) exit;
                         <th><span style="color:red">*</span> <?php _e('Quận / Huyện', 'supership'); ?></th>
                         <td>
                             <select id="pickup_district" name="pickup_district" style="width:100%;">
-                                <option value=""><?php _e('-- Chọn quận/huyện --', 'supership'); ?></option>
+                                <option value=""><?php _e('-- Chọn Quận/Huyện --', 'supership'); ?></option>
                             </select>
                         </td>
                     </tr>
@@ -77,14 +83,19 @@ if (!defined('ABSPATH')) exit;
                         <th><span style="color:red">*</span> <?php _e('Phường / Xã', 'supership'); ?></th>
                         <td>
                             <select id="pickup_commune" name="pickup_commune" style="width:100%;">
-                                <option value=""><?php _e('-- Chọn phường/xã --', 'supership'); ?></option>
+                                <option value=""><?php _e('-- Chọn Phường/Xã --', 'supership'); ?></option>
                             </select>
                         </td>
                     </tr>
                 </table>
             </div>
         </div>
-
+                <div class="checkbox-row" style="margin-top:12px;">
+                    <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="manual_pickup_toggle">
+                        <span><?php _e('Nhập thông tin kho thủ công', 'supership'); ?></span>
+                    </label>
+                </div>
         <!-- ================== 2. NGƯỜI NHẬN ================== -->
         <div class="section-box">
             <h2 class="title"><?php _e('2. Thông Tin Người Nhận', 'supership'); ?></h2>
@@ -162,7 +173,7 @@ if (!defined('ABSPATH')) exit;
 
     <table class="form-table">
         <tr>
-            <th><?php _e('Mã đơn riêng (SOC)', 'supership'); ?></th>
+            <th><?php _e('Mã đơn riêng', 'supership'); ?></th>
             <td>
                 <input type="text"
                        id="soc"
@@ -170,16 +181,13 @@ if (!defined('ABSPATH')) exit;
                        class="regular-text"
                        placeholder="<?php esc_attr_e('Mã đơn hàng nội bộ của bạn', 'supership'); ?>"
                        style="width: 100%;">
-                <p class="description">
-                    <?php _e('Mã tham chiếu đơn hàng nội bộ (nếu có).', 'supership'); ?>
-                </p>
             </td>
         </tr>
 
         <tr>
             <th>
                 <span style="color: red;">*</span>
-                <?php _e('Thông tin sản phẩm', 'supership'); ?>
+                <?php _e('Tên sản phẩm', 'supership'); ?>
             </th>
             <td>
                 <input type="text"
@@ -229,19 +237,16 @@ if (!defined('ABSPATH')) exit;
                     <input type="number"
                            id="length"
                            name="length"
-                           value="0"
                            min="0"
                            placeholder="<?php esc_attr_e('Dài', 'supership'); ?>">
                     <input type="number"
                            id="width"
                            name="width"
-                           value="0"
                            min="0"
                            placeholder="<?php esc_attr_e('Rộng', 'supership'); ?>">
                     <input type="number"
                            id="height"
                            name="height"
-                           value="0"
                            min="0"
                            placeholder="<?php esc_attr_e('Cao', 'supership'); ?>">
                 </div>
@@ -254,7 +259,6 @@ if (!defined('ABSPATH')) exit;
     <h2 class="title">
         <?php _e('4. Thanh toán & Tùy chọn', 'supership'); ?>
     </h2>
-
     <table class="form-table">
         <tr>
             <th>
@@ -267,11 +271,9 @@ if (!defined('ABSPATH')) exit;
                        name="amount"
                        class="regular-text"
                        min="0"
-                       placeholder="0"
+                       placeholder="Tiền thu khách"
                        style="width: 100%;">
-                <p class="description">
-                    <?php _e('Số tiền thu hộ khách hàng.', 'supership'); ?>
-                </p>
+               
             </td>
         </tr>
 
@@ -283,10 +285,10 @@ if (!defined('ABSPATH')) exit;
             <td>
                 <select id="payer" name="payer" style="width: 100%;">
                     <option value="1">
-                        <?php _e('Người gửi (Shop)', 'supership'); ?>
+                        <?php _e('Người gửi', 'supership'); ?>
                     </option>
                     <option value="2">
-                        <?php _e('Người nhận (Khách hàng)', 'supership'); ?>
+                        <?php _e('Người nhận', 'supership'); ?>
                     </option>
                 </select>
             </td>
@@ -295,18 +297,18 @@ if (!defined('ABSPATH')) exit;
         <tr>
             <th>
                 <span style="color: red;">*</span>
-                <?php _e('Cho xem thử hàng', 'supership'); ?>
+                <?php _e('Xem/thử hàng', 'supership'); ?>
             </th>
             <td>
                 <select id="config" name="config" style="width: 100%;">
                     <option value="1">
-                        <?php _e('Xem hàng không thử', 'supership'); ?>
+                        <?php _e('Cho Xem Hàng Nhưng Không Cho Thử', 'supership'); ?>
                     </option>
                     <option value="2">
-                        <?php _e('Được thử hàng', 'supership'); ?>
+                        <?php _e('Cho Thử Hàng', 'supership'); ?>
                     </option>
                     <option value="3">
-                        <?php _e('Không cho xem', 'supership'); ?>
+                        <?php _e('Không Cho Xem Hàng', 'supership'); ?>
                     </option>
                 </select>
             </td>
@@ -320,17 +322,14 @@ if (!defined('ABSPATH')) exit;
                         <?php _e('Không', 'supership'); ?>
                     </option>
                     <option value="1">
-                        <?php _e('Có (Hỗ trợ đổi hàng và trả hàng về)', 'supership'); ?>
+                        <?php _e('Có', 'supership'); ?>
                     </option>
                 </select>
-                <p class="description">
-                    <?php _e('Tùy chọn cho phép đổi hoặc lấy hàng về (nếu có).', 'supership'); ?>
-                </p>
             </td>
         </tr>
 
         <tr>
-            <th><?php _e('Ghi chú', 'supership'); ?></th>
+            <th><?php _e('Ghi chú khi giao', 'supership'); ?></th>
             <td>
                 <textarea id="note"
                           name="note"
@@ -343,137 +342,254 @@ if (!defined('ABSPATH')) exit;
     </table>
 </div>
 
-<div style="margin: 30px 0; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
-    <button type="submit"
-            class="button button-primary button-large"
-            style="font-size: 18px; padding: 15px 40px; height: auto;">
-        <?php _e('Tạo đơn hàng SuperShip', 'supership'); ?>
+<div class="submit">
+    <button type="submit" class="button button-primary">
+        <?php _e('Tạo đơn', 'supership'); ?>
     </button>
 </div>
 
+<div id="pickup-modal" class="pickup-modal">
+    <div class="pickup-modal-box">
+        <div class="pickup-modal-header">
+            <strong><?php _e('Chọn Kho Hàng', 'supership'); ?></strong>
+            <span class="pickup-close">×</span>
+        </div>
+
+         <div class="pickup-list">
+        <?php foreach ($warehouses as $w): ?>
+            <label class="pickup-item">
+            <input type="radio"
+                    name="pickup_radio"
+                    value="<?= esc_attr($w['code']); ?>"
+                    data-text="<?= esc_attr($w['name'].' - '.$w['formatted_address']); ?>"
+                    <?= ($default && $default['code'] === $w['code']) ? 'checked' : '' ?>>
+            <div>
+                <strong><?= esc_html($w['name']); ?></strong><br>
+                <small><?= esc_html($w['formatted_address']); ?></small>
+            </div>
+            </label>
+        <?php endforeach; ?>
+        </div>
+
+        <div class="pickup-modal-footer">
+            <button type="button" class="button button-primary" id="confirmPickup">
+                <?php _e('Xác nhận', 'supership'); ?>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
+
 .create-order {
-    max-width: 850px;
-    margin: 20px auto !important;
-    padding: 0 10px;
+    max-width: 900px;
+    margin: 20px 0 20px 0 !important;
+    padding-right: 20px;
 }
-/* ===== TITLE ===== */
-
-.create-order .title {
-    border-left: 4px solid #0073aa;
-    padding-left: 10px;
-    margin-bottom: 18px;
-    font-size: 1.3em;
-    font-weight: 600;
-}
-
-/* ===== BOX SECTION ===== */
 .section-box {
     background: #fff;
-    border: 1px solid #dcdcdc;
-    padding: 20px 25px;
-    margin-bottom: 28px;
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
-/* ===== TABLE FORM ===== */
+
+.section-box .title {
+    margin: 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid #ccd0d4;
+    background: #f6f7f7;
+}
+
+
+.section-box .form-table {
+    margin: 0;
+    width: 100%;
+}
+
 .section-box .form-table th {
-    width: 28%;
-    min-width: 140px;
-    padding: 10px 10px 10px 0;
+    width: 220px;
+    padding: 12px 16px;
     font-weight: 500;
     vertical-align: middle;
 }
 
 .section-box .form-table td {
-    padding: 10px 0;
+    padding: 12px 16px;
 }
 
-/* ===== INPUTS ===== */
+
 .section-box input[type="text"],
 .section-box input[type="tel"],
 .section-box input[type="number"],
 .section-box select,
 .section-box textarea {
     width: 100%;
-    max-width: 330px;
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-}
-
-/* ===== TEXTAREA ===== */
-.section-box textarea {
-    width: 100% !important;
     max-width: 420px;
+    height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #fff;
 }
 
-/* ===== ROW WIDTH FIX ===== */
-.section-box .form-table td > input.regular-text {
-    max-width: 330px !important;
+.section-box textarea {
+    height: auto;
+    min-height: 70px;
 }
 
-/* ===== KÍCH THƯỚC HÀNG HÓA ===== */
+/* Focus giống WP */
+.section-box input:focus,
+.section-box select:focus,
+.section-box textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+
+.section-box .description {
+    margin-top: 6px;
+    color: #646970;
+    font-size: 13px;
+}
+
+
+.dimension-box {
+    display: flex;
+    gap: 10px;
+}
+
 .dimension-box input {
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
+    width: 90px !important;
     text-align: center;
 }
 
-.dimension-box input {
-    width: 70px !important;
-    text-align: center;
-}
 
-/* ===== PICKUP MANUAL BOX ===== */
 #pickup_manual_fields {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed #ccc;
+    padding: 16px;
+    border-top: 1px dashed #ccd0d4;
+    background: #fcfcfc;
 }
 
-/* ===== SUBMIT BUTTON ===== */
-.submit-wrap {
-    margin: 30px 0;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-    text-align: center;
-}
-.submit-wrap button {
-    font-size: 18px;
-    padding: 14px 36px;
+.create-order .button-primary.button-large {
+    font-size: 14px;
+    padding: 8px 24px;
     height: auto;
 }
+#pickup_manual_fields .form-table {
+    margin-top: 0 !important;
+}
+.pickup-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    z-index: 9999;
+}
 
+.pickup-modal-box {
+    background: #fff;
+    width: 520px;
+    max-height: 80vh;
+    margin: 8% auto;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.pickup-modal-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+.pickup-close {
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.pickup-list {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.pickup-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.pickup-item:hover {
+    background: #f6f7f7;
+}
+
+.pickup-modal-footer {
+    padding: 12px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+.pickup-display-box {
+    width: 100%;
+    max-width: 420px;
+    padding: 8px 12px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #f6f7f7;
+    color: #1d2327;
+    line-height: 1.5;
+}
 </style>
 
 <script>
 jQuery(function($){
 
     // ===== TOGGLE PICKUP MANUAL FIELDS =====
-    function togglePickupFields() {
-        let code = $('#pickup_code').val();
-        let $manualFields = $('#pickup_manual_fields');
+    function togglePickupByCheckbox() {
+        let isManual = $('#manual_pickup_toggle').is(':checked');
         
-        // Cac truong bat buoc khi KHONG chon kho
-        let requiredFields = ['pickup_name', 'pickup_phone', 'pickup_address', 'pickup_province', 'pickup_district'];
-
-        if (code) {
-            // Co chon kho → an form nhap thu cong
-            $manualFields.slideUp(200);
-            requiredFields.forEach(id => $('#' + id).removeAttr('required'));
+        if (isManual) {
+            // Nhập thủ công - ẩn dropdown chọn kho
+            $('#pickup_code').closest('tr').fadeOut(300, function() {
+                $('#pickup_manual_fields').slideDown(400, function() {
+                    // Callback sau khi animation xong
+                    $(this).css('opacity', '1');
+                });
+            });
+            
+            // Xóa required của dropdown, thêm required cho manual fields
+            $('#pickup_code').removeAttr('required');
+            $('#pickup_manual_fields')
+                .find('input, select')
+                .attr('required', 'required');
+                
         } else {
-            // Khong chon kho → hien form nhap thu cong
-            $manualFields.slideDown(200);
-            requiredFields.forEach(id => $('#' + id).attr('required', 'required'));
+            // Chọn kho - ẩn manual fields
+            $('#pickup_manual_fields').slideUp(400, function() {
+                $('#pickup_code').closest('tr').fadeIn(300);
+            });
+            
+            // Ngược lại
+            $('#pickup_code').attr('required', 'required');
+            $('#pickup_manual_fields')
+                .find('input, select')
+                .removeAttr('required');
         }
     }
-    
-    // Su kien change cho Chọn kho
-    $('#pickup_code').on('change', togglePickupFields);
+    // Checkbox change event
+    $('#manual_pickup_toggle').on('change', function() {
+        togglePickupByCheckbox();
+    });
+
+    // Initial state - mặc định hiện chọn kho, ẩn manual
+    $('#pickup_manual_fields').hide();
+    $('#pickup_code').closest('tr').show();
 
     // ===== LOAD DISTRICTS WHEN RECEIVER PROVINCE CHANGES (Ajax) =====
     $('#province').on('change', function(){
@@ -609,10 +725,10 @@ jQuery(function($){
     // ===============================
     // 2. KIỂM TRA KHO LẤY HÀNG
     // ===============================
-    let pickup_code = $('#pickup_code').val();
+    let manualPickup = $('#manual_pickup_toggle').is(':checked');
 
         // Nếu KHÔNG chọn kho → bắt buộc nhập thủ công
-        if (!pickup_code) {
+        if (manualPickup) {
 
             if (!$('#pickup_name').val()) {
                 ssAlert("⚠️ Vui lòng nhập Tên Kho Lấy Hàng!");
@@ -678,6 +794,82 @@ jQuery(function($){
             this.submit();
         }
     });
-    togglePickupFields();
+    togglePickupByCheckbox();
 });
+jQuery(function($){
+
+    const modal = $('#pickup-modal');
+
+    // Mở modal
+    $('#btn-change-pickup').on('click', function(){
+        modal.show();
+    });
+
+    // Đóng modal
+    $('.pickup-close').on('click', function(){
+        modal.hide();
+    });
+
+    // Xác nhận chọn kho
+    $('#confirmPickup').on('click', function(){
+    const checked = $('input[name="pickup_radio"]:checked');
+    if (!checked.length) { alert('Vui lòng chọn kho'); return; }
+
+    $('#pickup_code').val(checked.val());
+    $('#pickup_display').text(checked.data('text'));
+    modal.hide();
+    });
+
+
+});
+
+const style = document.createElement('style');
+style.textContent = `
+    #pickup_manual_fields {
+        overflow: hidden;
+        transition: opacity 0.3s ease;
+    }
+    
+    /* Smooth fade cho select loading state */
+    select:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+    
+    /* Highlight required fields on focus */
+    input:required:focus,
+    select:required:focus {
+        border-color: #0073aa;
+        box-shadow: 0 0 0 1px #0073aa;
+    }
+    
+    /* Animation cho form submit button */
+    button[type="submit"]:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    /* Checkbox label enhancement */
+    label[for="manual_pickup_toggle"] {
+        cursor: pointer;
+        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    label[for="manual_pickup_toggle"]:hover {
+        background-color: #f0f0f0;
+    }
+    
+    #manual_pickup_toggle {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+    }
+`;
+document.head.appendChild(style);
 </script>

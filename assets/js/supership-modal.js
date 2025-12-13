@@ -28,6 +28,10 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     modalBody.html(response.data.html);
                     createBtn.prop('disabled', false).text('Tạo Đơn SuperShip');
+                    const $pickup = modalBody.find('select[name="select_pickup_code"]');
+                    if ($pickup.length && $pickup.val()) {
+                        $pickup.trigger('change'); // 👈 QUAN TRỌNG
+                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -97,7 +101,7 @@ jQuery(document).ready(function($) {
 
             modalBody.prepend('<div id="loading-overlay"><p>Đang xử lý tạo đơn...</p></div>');
 
-            const form_data = modalBody.find('select, input').serializeArray().reduce(function(obj, item) {
+            const form_data = modalBody.find('select, input, textarea').serializeArray().reduce(function(obj, item) {
                 obj[item.name] = item.value;
                 return obj;
             }, {});
@@ -229,3 +233,61 @@ jQuery(document).on("click", ".update-order-info", function(e) {
         });
     });
 });
+jQuery(document).ready(function ($) {
+
+    function toggleBarterExtra() {
+        const $checkbox = $('#barter_checkbox');
+        const $extra = $('#barter_extra');
+
+        if (!$checkbox.length || !$extra.length) return;
+
+        if ($checkbox.is(':checked')) {
+            $extra.show();
+        } else {
+            $extra.hide();
+        }
+    }
+
+    /**
+     * 1️⃣ Khi modal được load bằng AJAX
+     * modal-body được inject HTML sau khi click nút mở modal
+     */
+    $(document).on('ajaxComplete', function (event, xhr, settings) {
+        if (settings.data && settings.data.includes('load_config_modal')) {
+            toggleBarterExtra(); // chạy ngay sau khi HTML render
+        }
+    });
+
+    /**
+     * 2️⃣ Khi user tick / bỏ tick checkbox
+     */
+    $(document).on('change', '#barter_checkbox', function () {
+        toggleBarterExtra();
+    });
+    $(document).on('change', 'select[name="select_pickup_code"]', function () {
+    const pickupCode = $(this).val();
+    const orderId = $('#modal-create-btn').data('order-id');
+
+    if (!pickupCode) return;
+
+    $('#shipping_preview').html('Đang tính phí...');
+
+    $.post(modal_ajax.ajax_url, {
+        action: 'preview_shipping_fee',
+        security: modal_ajax.nonce,
+        order_id: orderId,
+        pickup_code: pickupCode
+    }, function (res) {
+        if (!res.success) {
+            $('#shipping_preview').html(res.data.message);
+            return;
+        }
+       $('#shipping_preview').html(`
+            <span class="fee">Phí vận chuyển: ${res.data.fee}</span>
+            <span class="sep"> | </span>
+            <span class="sub">Phí bảo hiểm: ${res.data.insurance}</span>
+        `);
+    });
+});
+});
+

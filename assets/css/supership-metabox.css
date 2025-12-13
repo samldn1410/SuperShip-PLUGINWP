@@ -42,32 +42,56 @@
     display: inline-block; /* Đảm bảo nằm 1 khối */
 }
 
-.cancel-btn {
-    background: #ffecec;
-    padding: 4px 10px;
-    border-radius: 6px;
-    color: #cc0000;
-    font-size: 12px;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: 0.2s;
-}
-.cancel-btn:hover {
-    background: #ffdbdb;
-    color: #a30000;
+.action-buttons {
+    display: flex;
+    gap: 8px;
 }
 
-.track-btn {
-    display: block;
-    margin: 16px auto 0;
-    text-align: center;
-    padding: 8px 0;
+/* Button chung */
+.action-btn {
+    flex: 1;
+    height: 34px;
     border-radius: 6px;
+    border: none;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 13px;
     font-weight: 600;
-    background: #0071a1;
     color: #fff !important;
-    text-decoration: none;
-    transition: 0.2s;
+    transition: all 0.2s ease;
+}
+
+/* Icon trong nút */
+.action-btn i {
+    font-size: 16px;
+}
+
+/* Làm mới */
+.update-order-info {
+    background: #2271b1;
+}
+.update-order-info:hover {
+    background: #1b5e91;
+}
+
+/* Hủy – xám + icon đỏ */
+.cancel-order {
+    background: #f1f3f5;
+}
+.cancel-order i {
+    color: #dc3545;
+}
+.cancel-order:hover {
+    background: #e9ecef;
+}
+
+/* Track button riêng (nếu còn dùng dạng to) */
+.track-btn {
+    background: #0071a1;
 }
 .track-btn:hover {
     background: #005f8a;
@@ -162,28 +186,14 @@
     padding: 8px 0;
     color: #fff !important;
 }
-
-.update-order-info {
-    background: #2271b1;
-}
-.update-order-info:hover {
-    background: #1b5e91;
-}
-
-.cancel-order {
-    background: #ff4a4a;
-}
-.cancel-order:hover {
-    background: #d63b3b;
-}
 .status-badge-cancel {
     background: #ffe3e3 !important;
     color: #cc0000 !important;
     border: 1px solid #ffb3b3;
 }
 .create-order-btn {
-    background: #0071a1;
-    color: #fff !important;
+    background: #f45b69;        /* đỏ nhẹ */
+    color: #ffffff !important;
     padding: 8px 16px;
     border-radius: 6px;
     border: none;
@@ -193,5 +203,5 @@
 }
 
 .create-order-btn:hover {
-    background: #005f8a;
+    background: #e64957;
 }

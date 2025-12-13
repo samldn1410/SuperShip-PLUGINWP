@@ -91,7 +91,12 @@ class Webhook_Handler {
         );
 
         if (!empty($order['wp_order_id'])) {
-            $wc_status = self::supership_name_to_wc_status($data['status_name']);
+            $status_code = (string)($data['status'] ?? '');
+
+            $wc_status = self::supership_status_to_wc_status(
+                $status_code,
+                $data
+            );
             $wc_order = wc_get_order($order['wp_order_id']);
             if ($wc_order) {
                 $wc_order->add_order_note('[SuperShip] ' . $log_message);
@@ -107,46 +112,48 @@ class Webhook_Handler {
         ];
     }
 
-   public static function supership_name_to_wc_status(string $status_name): string
-    {
-        $status_name = trim($status_name);
+  public static function supership_status_to_wc_status(string $status_code, array $data = []): string
+{
+    $partial = $data['partial'] ?? '0';
 
-        $map = [
-            'Chờ Duyệt'                 => 'on-hold',
-            'Chờ Lấy Hàng'              => 'processing',
-            'Đang Lấy Hàng'             => 'processing',
-            'Đã Lấy Hàng'               => 'processing',
-            'Đang Nhập Kho'             => 'processing',
-            'Đã Nhập Kho'               => 'processing',
-            'Đang Chuyển Kho Giao'      => 'processing',
-            'Đã Chuyển Kho Giao'        => 'processing',
-            'Đang Giao Hàng'            => 'processing',
-            'Đang Vận Chuyển'           => 'processing',
-            
-            'Hoãn Lấy Hàng'             => 'processing',
-            'Hoãn Giao Hàng'            => 'processing',
-            'Hoãn Trả Hàng'             => 'processing',
-            'Đang Chuyển Kho Trả'       => 'processing',
-            'Đã Chuyển Kho Trả'         => 'processing',
-            'Đang Trả Hàng'             => 'processing',
-            
-            'Đã Giao Hàng Một Phần'     => 'completed',
-            'Đã Giao Hàng Toàn Bộ'      => 'completed',
-            'Đã Đối Soát Giao Hàng'     => 'completed',
+    $map = [
+        '1'  => 'on-hold',      // Chờ Duyệt
+        '2'  => 'processing',   // Chờ Lấy Hàng
 
-            'Đã Trả Hàng'               => 'refunded',
-            'Xác Nhận Hoàn'             => 'refunded',
-            'Đã Đối Soát Trả Hàng'      => 'refunded',
-            'Đã Bồi Hoàn'               => 'refunded',
+        '3'  => 'processing',   // Đang Lấy Hàng
+        '4'  => 'processing',   // Đã Lấy Hàng
+        '7'  => 'processing',   // Đang Nhập Kho
+        '8'  => 'processing',   // Đã Nhập Kho
+        '9'  => 'processing',   // Đang Chuyển Kho Giao
+        '10' => 'processing',   // Đã Chuyển Kho Giao
+        '11' => 'processing',   // Đang Giao Hàng
+        '23' => 'processing',   // Đang Vận Chuyển
+    
+        '5'  => 'on-hold',      // Hoãn Lấy Hàng
+        '14' => 'on-hold',      // Hoãn Giao Hàng
+        '22' => 'on-hold',      // Hoãn Trả Hàng
 
-            'Huỷ'                       => 'cancelled',
-            'Không Lấy Được'            => 'failed',
-            'Không Giao Được'           => 'failed',
-            'Hàng Thất Lạc'             => 'failed',
-            'Không Trả Được'            => 'failed',
-        ];
+        '12' => 'completed',    // Đã Giao Hàng Toàn Bộ
+        '16' => 'completed',    // Đã Đối Soát Giao Hàng
+        '13' => 'completed',    // Đã Giao Một Phần
 
-        return $map[$status_name] ?? 'processing';
-    }
+        '18' => 'processing',   // Đang Chuyển Kho Trả
+        '19' => 'processing',   // Đã Chuyển Kho Trả
+        '20' => 'processing',   // Đang Trả Hàng
+        '21' => 'refunded',     // Đã Trả Hàng
+        '17' => 'refunded',     // Đã Đối Soát Trả Hàng
+        '24' => 'refunded',     // Xác Nhận Hoàn
+        '27' => 'refunded',     // Đã Bồi Hoàn
+
+        '6'  => 'failed',       // Không Lấy Được
+        '15' => 'failed',       // Không Giao Được
+        '25' => 'failed',       // Hàng Thất Lạc
+        '26' => 'failed',       // Không Trả Được
+=
+        '0'  => 'cancelled',    // Huỷ
+    ];
+
+    return $map[$status_code] ?? 'processing';
+}
 }
 Webhook_Handler::init();

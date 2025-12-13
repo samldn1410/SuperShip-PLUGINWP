@@ -18,28 +18,22 @@ class Admin_Menu {
          add_action('admin_enqueue_scripts', [__CLASS__, 'hide_save_button']);
     }
 
-    /** ================= TAB ================= */
 
     public static function add_tab($tabs) {
         $tabs['supership'] = __('SuperShip', 'supership');
         return $tabs;
     }
 
-    /** ================= SECTIONS ================= */
-
     public static function add_sections($sections) {
         return [
             'info'         => __('Thông tin', 'supership'),
             'api_token'    => __('API Token', 'supership'),
-            'webhook'      => __('Webhook', 'supership'),
-            'webhook_logs' => __('Webhook Logs', 'supership'),
+            // 'webhook'      => __('Webhook', 'supership'),
+            // 'webhook_logs' => __('Webhook Logs', 'supership'),
             'warehouses'   => __('Kho hàng', 'supership'),
-            'create_order' => __('Tạo đơn', 'supership'),
+            // 'create_order' => __('Tạo đơn', 'supership'),
         ];
     }
-
-    /** ================= RENDER ================= */
-
     public static function render() {
         global $current_section;
 
@@ -53,21 +47,21 @@ class Admin_Menu {
                 include DIR . 'views/settings.php'; 
                 break;
 
-            case 'webhook':
-                include DIR . 'views/webhook-settings.php';
-                break;
+            // case 'webhook':
+            //     include DIR . 'views/webhook-settings.php';
+            //     break;
 
-            case 'webhook_logs':
-                include DIR . 'views/webhook-logs.php';
-                break;
+            // case 'webhook_logs':
+            //     include DIR . 'views/webhook-logs.php';
+            //     break;
 
             case 'warehouses':
                 include DIR . 'views/warehouse.php';
                 break;
 
-            case 'create_order':
-                include DIR . 'views/create-order.php';
-                break;
+            // case 'create_order':
+            //     include DIR . 'views/create-order.php';
+            //     break;
 
             default:
                 self::output_info();
@@ -106,9 +100,7 @@ class Admin_Menu {
         if (in_array($current_section, $sections_without_save)) {
             ?>
             <style type="text/css">
-                .woocommerce-save-button,
-                p.submit,
-                input[type="submit"].button-primary {
+                .woocommerce-save-button {
                     display: none !important;
                 }
             </style>
